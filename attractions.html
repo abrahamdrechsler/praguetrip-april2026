@@ -6,19 +6,19 @@
 <title>Prague & Český Ráj — Trip Planner</title>
 <style>
   :root {
-    --bg: #0f1117;
-    --card-bg: #1a1d27;
-    --card-border: #2a2d3a;
-    --accent: #5b8def;
-    --accent-dim: #3a5a9e;
-    --green: #4caf50;
-    --yellow: #ffc107;
-    --red: #ef5350;
-    --orange: #ff9800;
-    --text: #e8eaed;
-    --text-dim: #9aa0a6;
-    --text-muted: #6b7280;
-    --tag-bg: #2a2d3a;
+    --bg: #f8f9fa;
+    --card-bg: #ffffff;
+    --card-border: #e5e7eb;
+    --accent: #1a1a1a;
+    --accent-dim: #374151;
+    --green: #16a34a;
+    --yellow: #ca8a04;
+    --red: #dc2626;
+    --orange: #ea580c;
+    --text: #1f2937;
+    --text-dim: #6b7280;
+    --text-muted: #9ca3af;
+    --tag-bg: #f3f4f6;
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -35,7 +35,7 @@
     position: sticky;
     top: 0;
     z-index: 100;
-    background: rgba(15, 17, 23, 0.92);
+    background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(12px);
     border-bottom: 1px solid var(--card-border);
     padding: 12px 16px;
@@ -57,7 +57,7 @@
     display: flex;
     gap: 0;
     padding: 0 16px;
-    background: rgba(15, 17, 23, 0.92);
+    background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(12px);
     position: sticky;
     top: 62px;
@@ -124,6 +124,7 @@
     margin-bottom: 12px;
     overflow: hidden;
     transition: transform 0.15s;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
   }
 
   .card:active {
@@ -144,7 +145,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(135deg, #1e2230, #252a3a);
+    background: linear-gradient(135deg, #e5e7eb, #f3f4f6);
     font-size: 48px;
   }
 
@@ -188,11 +189,11 @@
     color: var(--text-dim);
   }
 
-  .tag.green { background: rgba(76, 175, 80, 0.15); color: var(--green); }
-  .tag.yellow { background: rgba(255, 193, 7, 0.15); color: var(--yellow); }
-  .tag.red { background: rgba(239, 83, 80, 0.15); color: var(--red); }
-  .tag.blue { background: rgba(91, 141, 239, 0.15); color: var(--accent); }
-  .tag.orange { background: rgba(255, 152, 0, 0.15); color: var(--orange); }
+  .tag.green { background: rgba(22, 163, 74, 0.1); color: var(--green); }
+  .tag.yellow { background: rgba(202, 138, 4, 0.1); color: var(--yellow); }
+  .tag.red { background: rgba(220, 38, 38, 0.1); color: var(--red); }
+  .tag.blue { background: rgba(59, 130, 246, 0.1); color: #2563eb; }
+  .tag.orange { background: rgba(234, 88, 12, 0.1); color: var(--orange); }
 
   .stats {
     display: grid;
@@ -201,7 +202,7 @@
   }
 
   .stat {
-    background: rgba(255,255,255,0.03);
+    background: #f9fafb;
     border-radius: 8px;
     padding: 8px 10px;
   }
@@ -284,15 +285,15 @@
   }
 
   .expand-toggle:hover {
-    background: rgba(91, 141, 239, 0.05);
+    background: #f9fafb;
   }
 
   .verdict {
     margin-top: 12px;
     padding: 10px 12px;
-    background: rgba(91, 141, 239, 0.08);
+    background: #f9fafb;
     border-radius: 8px;
-    border-left: 3px solid var(--accent);
+    border-left: 3px solid #d1d5db;
     font-size: 13px;
     color: var(--text-dim);
     line-height: 1.5;
@@ -303,18 +304,18 @@
   }
 
   .alert-banner {
-    background: rgba(255, 152, 0, 0.1);
-    border: 1px solid rgba(255, 152, 0, 0.3);
+    background: #fff7ed;
+    border: 1px solid #fed7aa;
     border-radius: 10px;
     padding: 12px 14px;
     margin-bottom: 12px;
     font-size: 13px;
-    color: var(--orange);
+    color: #9a3412;
     line-height: 1.5;
   }
 
   .alert-banner strong {
-    color: #ffb74d;
+    color: #c2410c;
   }
 
   .hidden { display: none; }
@@ -323,7 +324,7 @@
   .carousel {
     position: relative;
     overflow: hidden;
-    background: #252830;
+    background: #e5e7eb;
   }
 
   .carousel-track {
@@ -360,7 +361,7 @@
     transition: background 0.2s;
   }
 
-  .carousel-btn:hover { background: rgba(0,0,0,0.75); }
+  .carousel-btn:hover { background: rgba(0,0,0,0.6); }
   .carousel-btn.prev { left: 8px; }
   .carousel-btn.next { right: 8px; }
 
@@ -404,6 +405,145 @@
   @media (max-width: 767px) {
     .card { display: block; }
   }
+
+  /* Calendar */
+  .calendar {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 4px;
+    table-layout: fixed;
+    margin-bottom: 20px;
+  }
+
+  .calendar th {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--text-muted);
+    padding: 8px 4px;
+    text-align: center;
+  }
+
+  .calendar td {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 8px;
+    padding: 8px 6px;
+    vertical-align: top;
+    min-height: 90px;
+    height: 100px;
+    font-size: 12px;
+    position: relative;
+    transition: border-color 0.2s;
+  }
+
+  .calendar td:hover {
+    border-color: var(--accent-dim);
+  }
+
+  .calendar td.empty {
+    background: #fafafa;
+    border-color: #f3f4f6;
+    opacity: 0.5;
+  }
+
+  .calendar td.prague {
+    border-left: 3px solid #3b82f6;
+  }
+
+  .calendar td.turnov {
+    border-left: 3px solid #16a34a;
+  }
+
+  .calendar td.travel {
+    border-left: 3px solid #ea580c;
+  }
+
+  .calendar td.flight {
+    border-left: 3px solid #dc2626;
+  }
+
+  .cal-date {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+
+  .cal-month {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+  }
+
+  .cal-label {
+    display: inline-block;
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 1px 5px;
+    border-radius: 3px;
+    margin-bottom: 4px;
+  }
+
+  .cal-label.prague-label { background: rgba(59,130,246,0.1); color: #2563eb; }
+  .cal-label.turnov-label { background: rgba(22,163,74,0.1); color: var(--green); }
+  .cal-label.travel-label { background: rgba(234,88,12,0.1); color: var(--orange); }
+  .cal-label.flight-label { background: rgba(220,38,38,0.1); color: var(--red); }
+
+  .cal-detail {
+    font-size: 11px;
+    color: var(--text-dim);
+    line-height: 1.4;
+  }
+
+  .cal-accommodation {
+    font-size: 10px;
+    color: var(--text-muted);
+    margin-top: 4px;
+    font-style: italic;
+  }
+
+  .cal-legend {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+    padding: 10px 14px;
+    background: var(--card-bg);
+    border-radius: 8px;
+    border: 1px solid var(--card-border);
+  }
+
+  .cal-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--text-dim);
+  }
+
+  .cal-legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 3px;
+  }
+
+  @media (max-width: 767px) {
+    .calendar td {
+      padding: 4px 3px;
+      height: 80px;
+      font-size: 10px;
+    }
+    .cal-date { font-size: 12px; }
+    .cal-detail { font-size: 9px; }
+    .cal-label { font-size: 8px; }
+    .cal-accommodation { display: none; }
+    .calendar th { font-size: 10px; padding: 6px 2px; }
+  }
 </style>
 </head>
 <body>
@@ -414,15 +554,272 @@
 </div>
 
 <div class="tabs" id="tabs">
-  <div class="tab active" data-tab="turnov">Český Ráj <span class="count">7</span></div>
+  <div class="tab active" data-tab="itinerary">Itinerary</div>
+  <div class="tab" data-tab="turnov">Český Ráj <span class="count">7</span></div>
   <div class="tab" data-tab="prague">Prague <span class="count">8</span></div>
-  <div class="tab" data-tab="logistics">Logistics</div>
+  <a class="tab" href="https://maps.app.goo.gl/vQiEmhTxgBNSkJqX8" target="_blank" rel="noopener" style="text-decoration:none;color:var(--text-dim)">Map ↗</a>
 </div>
 
 <div class="content">
 
+<!-- ==================== ITINERARY TAB ==================== -->
+<div id="tab-itinerary">
+
+  <div class="cal-legend">
+    <div class="cal-legend-item"><div class="cal-legend-dot" style="background:#3b82f6"></div> Prague</div>
+    <div class="cal-legend-item"><div class="cal-legend-dot" style="background:#16a34a"></div> Turnov</div>
+    <div class="cal-legend-item"><div class="cal-legend-dot" style="background:#ea580c"></div> Travel Day</div>
+    <div class="cal-legend-item"><div class="cal-legend-dot" style="background:#dc2626"></div> Flight</div>
+  </div>
+
+  <table class="calendar">
+    <thead>
+      <tr>
+        <th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th><th>Sat</th><th>Sun</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- Week 1: Mar 30 – Apr 5 -->
+      <tr>
+        <td class="empty">
+          <div class="cal-date">30 <span class="cal-month">Mar</span></div>
+        </td>
+        <td class="empty">
+          <div class="cal-date">31 <span class="cal-month">Mar</span></div>
+        </td>
+        <td class="empty">
+          <div class="cal-date">1 <span class="cal-month">Apr</span></div>
+        </td>
+        <td class="flight prague" style="border-left:3px solid #dc2626">
+          <div class="cal-date">2</div>
+          <div class="cal-label flight-label">Fly Out</div>
+          <div class="cal-detail">IAD → VIE 5:25 PM. Hotel check-in from today.</div>
+          <div class="cal-accommodation">Kaiserstein Palace</div>
+        </td>
+        <td class="prague">
+          <div class="cal-date">3</div>
+          <div class="cal-label prague-label">Arrive Prague</div>
+          <div class="cal-detail">Land 10:35 AM. Blacklane transfer. Early check-in guaranteed.</div>
+          <div class="cal-accommodation">Kaiserstein Palace</div>
+        </td>
+        <td class="prague">
+          <div class="cal-date">4</div>
+          <div class="cal-label prague-label">Prague</div>
+          <div class="cal-detail">Day 1 — explore Malá Strana</div>
+          <div class="cal-accommodation">Kaiserstein Palace</div>
+        </td>
+        <td class="prague">
+          <div class="cal-date">5</div>
+          <div class="cal-label prague-label">Prague</div>
+          <div class="cal-detail">Day 2</div>
+          <div class="cal-accommodation">Kaiserstein Palace</div>
+        </td>
+      </tr>
+      <!-- Week 2: Apr 6 – Apr 12 -->
+      <tr>
+        <td class="prague">
+          <div class="cal-date">6</div>
+          <div class="cal-label prague-label">Prague</div>
+          <div class="cal-detail">Day 3</div>
+          <div class="cal-accommodation">Kaiserstein Palace</div>
+        </td>
+        <td class="prague">
+          <div class="cal-date">7</div>
+          <div class="cal-label prague-label">Prague</div>
+          <div class="cal-detail">Day 4</div>
+          <div class="cal-accommodation">Kaiserstein Palace</div>
+        </td>
+        <td class="prague">
+          <div class="cal-date">8</div>
+          <div class="cal-label prague-label">Prague</div>
+          <div class="cal-detail">Day 5</div>
+          <div class="cal-accommodation">Kaiserstein Palace</div>
+        </td>
+        <td class="prague">
+          <div class="cal-date">9</div>
+          <div class="cal-label prague-label">Prague</div>
+          <div class="cal-detail">Day 6 — last full day</div>
+          <div class="cal-accommodation">Kaiserstein Palace</div>
+        </td>
+        <td class="travel">
+          <div class="cal-date">10</div>
+          <div class="cal-label travel-label">→ Turnov</div>
+          <div class="cal-detail">Check out 11 AM. Drive to Turnov. Check-in 3 PM.</div>
+          <div class="cal-accommodation">Šimákova Vila</div>
+        </td>
+        <td class="turnov">
+          <div class="cal-date">11</div>
+          <div class="cal-label turnov-label">Turnov</div>
+          <div class="cal-detail">Day 1 — Saturday</div>
+          <div class="cal-accommodation">Šimákova Vila</div>
+        </td>
+        <td class="turnov">
+          <div class="cal-date">12</div>
+          <div class="cal-label turnov-label">Turnov</div>
+          <div class="cal-detail">Day 2 — Sunday</div>
+          <div class="cal-accommodation">Šimákova Vila</div>
+        </td>
+      </tr>
+      <!-- Week 3: Apr 13 – Apr 19 -->
+      <tr>
+        <td class="turnov">
+          <div class="cal-date">13</div>
+          <div class="cal-label turnov-label">Turnov</div>
+          <div class="cal-detail">Day 3</div>
+          <div class="cal-accommodation">Šimákova Vila</div>
+        </td>
+        <td class="turnov">
+          <div class="cal-date">14</div>
+          <div class="cal-label turnov-label">Turnov</div>
+          <div class="cal-detail">Day 4 — last full day</div>
+          <div class="cal-accommodation">Šimákova Vila</div>
+        </td>
+        <td class="prague">
+          <div class="cal-date">15</div>
+          <div class="cal-label travel-label">→ Prague</div>
+          <div class="cal-detail">Check out 10 AM. Drive to Prague. Check-in 3 PM. Last evening.</div>
+          <div class="cal-accommodation">Andaz Prague</div>
+        </td>
+        <td class="flight">
+          <div class="cal-date">16</div>
+          <div class="cal-label flight-label">Fly Home</div>
+          <div class="cal-detail">PRG → FRA → IAD. Depart 9:10 AM. Business class.</div>
+          <div class="cal-accommodation">Arrive IAD ~4 PM</div>
+        </td>
+        <td class="empty">
+          <div class="cal-date">17</div>
+        </td>
+        <td class="empty">
+          <div class="cal-date">18</div>
+        </td>
+        <td class="empty">
+          <div class="cal-date">19</div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="section-label">Accommodations</div>
+
+  <div class="card">
+    <div class="card-body">
+      <div class="card-title">Kaiserstein Palace Apartments</div>
+      <div class="card-subtitle">Malostranské nám. 23, Malá Strana · Apr 2–10 (8 nights)</div>
+      <div class="tags"><span class="tag blue">Abe + Allie + Kids · Prague</span></div>
+      <div class="detail-row">
+        <div class="detail-icon">🔑</div>
+        <div class="detail-content"><div class="detail-value">Check-in Thu Apr 2 at 3 PM · Check-out Fri Apr 10 at 11 AM · Executive Apt, 2 bath · Conf# 2363379152</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-body">
+      <div class="card-title">Primavera Castle Apartments</div>
+      <div class="card-subtitle">Prague · Apr 3–10</div>
+      <div class="tags"><span class="tag blue">Cliff & Denise · Prague</span></div>
+      <div class="detail-row">
+        <div class="detail-icon">🔑</div>
+        <div class="detail-content"><div class="detail-value">Cliff & Denise's separate Prague apartment.</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-body">
+      <div class="card-title">Apartments Šimákova Vila</div>
+      <div class="card-subtitle">Skálova 463, Turnov · Apr 10–15 (5 nights)</div>
+      <div class="tags"><span class="tag green">Everyone · Turnov</span><span class="tag green">Free Parking</span></div>
+      <div class="detail-row">
+        <div class="detail-icon">🔑</div>
+        <div class="detail-content"><div class="detail-value">Check-in 3–8 PM · 3-bed apt, garden view · All 6 guests together · Conf# 4427184951 · Phone: +420 602 747 563</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-body">
+      <div class="card-title">Andaz Prague (FHR)</div>
+      <div class="card-subtitle">Senovážné nám. 976/31, Nové Město · Apr 15–16 (1 night)</div>
+      <div class="tags"><span class="tag orange">Abe + Allie + Kids · Last Night</span><span class="tag green">FHR Perks</span></div>
+      <div class="detail-row">
+        <div class="detail-icon">🔑</div>
+        <div class="detail-content"><div class="detail-value">Check-in 3 PM · Family Room · FHR: upgrade + breakfast + credit · Conf# 1510018A010664</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-body">
+      <div class="card-title">Gold Bank Hotel</div>
+      <div class="card-subtitle">Prague · Apr 15–16 (1 night)</div>
+      <div class="tags"><span class="tag orange">Cliff & Denise · Last Night</span></div>
+      <div class="detail-row">
+        <div class="detail-icon">🔑</div>
+        <div class="detail-content"><div class="detail-value">Cliff & Denise's last-night hotel.</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-label">Flights</div>
+
+  <div class="card">
+    <div class="card-body">
+      <div class="card-title">Outbound · Apr 2–3 — Everyone</div>
+      <div class="card-subtitle">Economy · Austrian Airlines · Ref: CXA674</div>
+      <div class="detail-row">
+        <div class="detail-icon">1️⃣</div>
+        <div class="detail-content"><div class="detail-value">IAD → VIE · OS 042 · Depart 5:25 PM · Arrive 8:15 AM+1 · 8h 50m</div></div>
+      </div>
+      <div class="detail-row">
+        <div class="detail-icon">2️⃣</div>
+        <div class="detail-content"><div class="detail-value">VIE → PRG · OS 643 · Depart 9:45 AM · Arrive 10:35 AM · 50m</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-body">
+      <div class="card-title">Return · Apr 16 — Abe + Allie + Kids</div>
+      <div class="card-subtitle">Business Class · Lufthansa · Ref: CXA674</div>
+      <div class="detail-row">
+        <div class="detail-icon">1️⃣</div>
+        <div class="detail-content"><div class="detail-value">PRG → FRA · LH 1393 · Depart 9:10 AM · ~1h 10m</div></div>
+      </div>
+      <div class="detail-row">
+        <div class="detail-icon">2️⃣</div>
+        <div class="detail-content"><div class="detail-value">FRA → IAD · LH 418 · Depart 1:10 PM · Arrive 4:05 PM · ~9h 55m</div></div>
+      </div>
+      <div class="detail-row">
+        <div class="detail-icon">🛋️</div>
+        <div class="detail-content"><div class="detail-value">FRA layover: 2h 50m · Lufthansa Business Lounge access</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-body">
+      <div class="card-title">Return · Apr 16 — Cliff & Denise</div>
+      <div class="card-subtitle">United Airlines (via Frankfurt)</div>
+      <div class="detail-row">
+        <div class="detail-icon">1️⃣</div>
+        <div class="detail-content"><div class="detail-value">PRG → FRA · UA9061 (operated by Lufthansa) · Depart ~10:15 AM · ~1h 10m</div></div>
+      </div>
+      <div class="detail-row">
+        <div class="detail-icon">2️⃣</div>
+        <div class="detail-content"><div class="detail-value">FRA → IAD · UA988 · Depart ~12:20 PM · Arrive ~3:15 PM · ~8h 55m</div></div>
+      </div>
+      <div class="detail-row">
+        <div class="detail-icon">⏱️</div>
+        <div class="detail-content"><div class="detail-value">FRA layover: ~1h 55m · Confirm exact times closer to date</div></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
 <!-- ==================== TURNOV TAB ==================== -->
-<div id="tab-turnov">
+<div id="tab-turnov" class="hidden">
 
   <div class="alert-banner">
     <strong>⚠️ April Seasonality Warning:</strong> Some attractions don't open until late April or May. Verify opening dates before each visit. Your dates: Apr 10–14.
@@ -1137,103 +1534,6 @@
 
 </div>
 
-<!-- ==================== LOGISTICS TAB ==================== -->
-<div id="tab-logistics" class="hidden">
-
-  <div class="section-label">Accommodations</div>
-
-  <div class="card">
-    <div class="card-body">
-      <div class="card-title">Kaiserstein Palace Apartments</div>
-      <div class="card-subtitle">Malostranské nám. 23, Malá Strana · Apr 3–10 (7 nights)</div>
-      <div class="tags"><span class="tag blue">Prague Base</span></div>
-      <div class="detail-row">
-        <div class="detail-icon">🔑</div>
-        <div class="detail-content">
-          <div class="detail-value">Check-in 3 PM · Check-out 11 AM · Executive Apt, 2 bath · Conf# 2363379152</div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="card">
-    <div class="card-body">
-      <div class="card-title">Apartments Šimákova Vila</div>
-      <div class="card-subtitle">Skálova 463, Turnov · Apr 10–15 (5 nights)</div>
-      <div class="tags"><span class="tag blue">Turnov Base</span><span class="tag green">Free Parking</span></div>
-      <div class="detail-row">
-        <div class="detail-icon">🔑</div>
-        <div class="detail-content">
-          <div class="detail-value">Check-in 3–8 PM · 3-bed apt, garden view · All 6 guests together · Conf# 4427184951 · Phone: +420 602 747 563</div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="card">
-    <div class="card-body">
-      <div class="card-title">Andaz Prague (FHR)</div>
-      <div class="card-subtitle">Senovážné nám. 976/31, Nové Město · Apr 15–16 (1 night)</div>
-      <div class="tags"><span class="tag blue">Last Night</span><span class="tag green">Business Class Perks</span></div>
-      <div class="detail-row">
-        <div class="detail-icon">🔑</div>
-        <div class="detail-content">
-          <div class="detail-value">Check-in 3 PM · Family Room · FHR: upgrade + breakfast + credit · Conf# 1510018A010664</div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="section-label">Flights</div>
-
-  <div class="card">
-    <div class="card-body">
-      <div class="card-title">✈️ Outbound · Apr 2–3</div>
-      <div class="card-subtitle">Economy · Austrian Airlines · Ref: CXA674</div>
-      <div class="detail-row">
-        <div class="detail-icon">1️⃣</div>
-        <div class="detail-content"><div class="detail-value">IAD → VIE · OS 042 · Depart 5:25 PM · Arrive 8:15 AM+1 · 8h 50m</div></div>
-      </div>
-      <div class="detail-row">
-        <div class="detail-icon">2️⃣</div>
-        <div class="detail-content"><div class="detail-value">VIE → PRG · OS 643 · Depart 9:45 AM · Arrive 10:35 AM · 50m</div></div>
-      </div>
-    </div>
-  </div>
-
-  <div class="card">
-    <div class="card-body">
-      <div class="card-title">✈️ Return · Apr 16</div>
-      <div class="card-subtitle">Business Class 🎉 · Lufthansa · Ref: CXA674</div>
-      <div class="detail-row">
-        <div class="detail-icon">1️⃣</div>
-        <div class="detail-content"><div class="detail-value">PRG → FRA · LH 1393 · Depart 9:10 AM · ~1h 10m</div></div>
-      </div>
-      <div class="detail-row">
-        <div class="detail-icon">2️⃣</div>
-        <div class="detail-content"><div class="detail-value">FRA → IAD · LH 418 · Depart 1:10 PM · Arrive 4:05 PM · ~9h 55m</div></div>
-      </div>
-      <div class="detail-row">
-        <div class="detail-icon">🛋️</div>
-        <div class="detail-content"><div class="detail-value">FRA layover: 2h 50m · Lufthansa Business Lounge access</div></div>
-      </div>
-    </div>
-  </div>
-
-  <div class="section-label">Key Dates</div>
-
-  <div class="card">
-    <div class="card-body" style="font-size:13px;">
-      <div class="detail-row"><div class="detail-icon">📅</div><div class="detail-content"><div class="detail-value"><strong>Apr 3 (Fri)</strong> — Land 10:35. Blacklane → Malá Strana. Check-in 3 PM.</div></div></div>
-      <div class="detail-row"><div class="detail-icon">📅</div><div class="detail-content"><div class="detail-value"><strong>Apr 4–9</strong> — Prague days (6 full days)</div></div></div>
-      <div class="detail-row"><div class="detail-icon">🚗</div><div class="detail-content"><div class="detail-value"><strong>Apr 10 (Fri)</strong> — Check out 11 AM → Drive/train to Turnov. Check-in 3 PM.</div></div></div>
-      <div class="detail-row"><div class="detail-icon">📅</div><div class="detail-content"><div class="detail-value"><strong>Apr 11–14</strong> — Turnov / Český Ráj (4 full days)</div></div></div>
-      <div class="detail-row"><div class="detail-icon">🚗</div><div class="detail-content"><div class="detail-value"><strong>Apr 15 (Wed)</strong> — Check out 10 AM → Drive to Prague. Andaz check-in 3 PM. Last evening.</div></div></div>
-      <div class="detail-row"><div class="detail-icon">✈️</div><div class="detail-content"><div class="detail-value"><strong>Apr 16 (Thu)</strong> — Depart PRG 9:10 AM. Business class home. Arrive IAD ~4:05 PM.</div></div></div>
-    </div>
-  </div>
-
-</div>
 
 </div>
 
