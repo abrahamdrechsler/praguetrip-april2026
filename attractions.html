@@ -1,0 +1,1367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prague & Český Ráj — Trip Planner</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --card-bg: #1a1d27;
+    --card-border: #2a2d3a;
+    --accent: #5b8def;
+    --accent-dim: #3a5a9e;
+    --green: #4caf50;
+    --yellow: #ffc107;
+    --red: #ef5350;
+    --orange: #ff9800;
+    --text: #e8eaed;
+    --text-dim: #9aa0a6;
+    --text-muted: #6b7280;
+    --tag-bg: #2a2d3a;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(15, 17, 23, 0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--card-border);
+    padding: 12px 16px;
+  }
+
+  .header h1 {
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+  }
+
+  .header .subtitle {
+    font-size: 13px;
+    color: var(--text-dim);
+    margin-top: 2px;
+  }
+
+  .tabs {
+    display: flex;
+    gap: 0;
+    padding: 0 16px;
+    background: rgba(15, 17, 23, 0.92);
+    backdrop-filter: blur(12px);
+    position: sticky;
+    top: 62px;
+    z-index: 99;
+    border-bottom: 1px solid var(--card-border);
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .tabs::-webkit-scrollbar { display: none; }
+
+  .tab {
+    padding: 10px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-dim);
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s;
+    user-select: none;
+  }
+
+  .tab.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+  }
+
+  .tab .count {
+    display: inline-block;
+    background: var(--tag-bg);
+    color: var(--text-dim);
+    font-size: 11px;
+    padding: 1px 6px;
+    border-radius: 10px;
+    margin-left: 4px;
+  }
+
+  .tab.active .count {
+    background: var(--accent-dim);
+    color: var(--text);
+  }
+
+  .content {
+    padding: 12px 16px 100px;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  .section-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-muted);
+    padding: 16px 0 8px;
+  }
+
+  .card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    margin-bottom: 12px;
+    overflow: hidden;
+    transition: transform 0.15s;
+  }
+
+  .card:active {
+    transform: scale(0.98);
+  }
+
+  .card-image {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+    display: block;
+    background: #252830;
+  }
+
+  .card-image-placeholder {
+    width: 100%;
+    height: 180px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #1e2230, #252a3a);
+    font-size: 48px;
+  }
+
+  .card-body {
+    padding: 14px 16px 16px;
+  }
+
+  .card-title {
+    font-size: 17px;
+    font-weight: 700;
+    margin-bottom: 2px;
+    letter-spacing: -0.2px;
+  }
+
+  .card-subtitle {
+    font-size: 13px;
+    color: var(--text-dim);
+    margin-bottom: 10px;
+  }
+
+  .card-desc {
+    font-size: 14px;
+    color: var(--text-dim);
+    margin-bottom: 12px;
+    line-height: 1.55;
+  }
+
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 12px;
+  }
+
+  .tag {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 6px;
+    background: var(--tag-bg);
+    color: var(--text-dim);
+  }
+
+  .tag.green { background: rgba(76, 175, 80, 0.15); color: var(--green); }
+  .tag.yellow { background: rgba(255, 193, 7, 0.15); color: var(--yellow); }
+  .tag.red { background: rgba(239, 83, 80, 0.15); color: var(--red); }
+  .tag.blue { background: rgba(91, 141, 239, 0.15); color: var(--accent); }
+  .tag.orange { background: rgba(255, 152, 0, 0.15); color: var(--orange); }
+
+  .stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .stat {
+    background: rgba(255,255,255,0.03);
+    border-radius: 8px;
+    padding: 8px 10px;
+  }
+
+  .stat-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--text-muted);
+    font-weight: 600;
+  }
+
+  .stat-value {
+    font-size: 14px;
+    font-weight: 600;
+    margin-top: 2px;
+  }
+
+  .detail-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 8px 0;
+    border-top: 1px solid var(--card-border);
+    font-size: 13px;
+  }
+
+  .detail-row:first-child { border-top: none; }
+
+  .detail-icon {
+    font-size: 16px;
+    flex-shrink: 0;
+    width: 24px;
+    text-align: center;
+    padding-top: 1px;
+  }
+
+  .detail-content {
+    flex: 1;
+  }
+
+  .detail-label {
+    color: var(--text-muted);
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .detail-value {
+    color: var(--text);
+    margin-top: 1px;
+  }
+
+  .expandable {
+    cursor: pointer;
+  }
+
+  .expand-section {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+  }
+
+  .expand-section.open {
+    max-height: 600px;
+  }
+
+  .expand-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+    font-size: 12px;
+    color: var(--accent);
+    font-weight: 600;
+    cursor: pointer;
+    border-top: 1px solid var(--card-border);
+    user-select: none;
+  }
+
+  .expand-toggle:hover {
+    background: rgba(91, 141, 239, 0.05);
+  }
+
+  .verdict {
+    margin-top: 12px;
+    padding: 10px 12px;
+    background: rgba(91, 141, 239, 0.08);
+    border-radius: 8px;
+    border-left: 3px solid var(--accent);
+    font-size: 13px;
+    color: var(--text-dim);
+    line-height: 1.5;
+  }
+
+  .verdict strong {
+    color: var(--text);
+  }
+
+  .alert-banner {
+    background: rgba(255, 152, 0, 0.1);
+    border: 1px solid rgba(255, 152, 0, 0.3);
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-bottom: 12px;
+    font-size: 13px;
+    color: var(--orange);
+    line-height: 1.5;
+  }
+
+  .alert-banner strong {
+    color: #ffb74d;
+  }
+
+  .hidden { display: none; }
+
+  /* Carousel */
+  .carousel {
+    position: relative;
+    overflow: hidden;
+    background: #252830;
+  }
+
+  .carousel-track {
+    display: flex;
+    transition: transform 0.3s ease;
+    height: 180px;
+  }
+
+  .carousel-track img {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+    flex-shrink: 0;
+    display: block;
+  }
+
+  .carousel-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0,0,0,0.5);
+    color: #fff;
+    border: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 14px;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(4px);
+    transition: background 0.2s;
+  }
+
+  .carousel-btn:hover { background: rgba(0,0,0,0.75); }
+  .carousel-btn.prev { left: 8px; }
+  .carousel-btn.next { right: 8px; }
+
+  .carousel-dots {
+    position: absolute;
+    bottom: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 5px;
+    z-index: 2;
+  }
+
+  .carousel-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.4);
+    transition: background 0.2s;
+  }
+
+  .carousel-dot.active {
+    background: #fff;
+  }
+
+  @media (min-width: 768px) {
+    .content { padding: 16px 24px 100px; }
+    .card-image { height: 240px; }
+    .card { display: grid; grid-template-columns: 300px 1fr; }
+    .card-image { height: 100%; min-height: 240px; }
+    .card-image-placeholder { height: 100%; min-height: 240px; }
+    .carousel { min-height: 240px; }
+    .carousel-track { height: 100%; min-height: 240px; }
+    .carousel-track img { height: 100%; min-height: 240px; }
+    .stats { grid-template-columns: repeat(4, 1fr); }
+    .header { padding: 16px 24px; }
+    .header h1 { font-size: 22px; }
+    .tabs { padding: 0 24px; }
+  }
+
+  @media (max-width: 767px) {
+    .card { display: block; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Prague & Český Ráj Trip</h1>
+  <div class="subtitle">Apr 3–16, 2026 · Drechsler Family</div>
+</div>
+
+<div class="tabs" id="tabs">
+  <div class="tab active" data-tab="turnov">Český Ráj <span class="count">7</span></div>
+  <div class="tab" data-tab="prague">Prague <span class="count">8</span></div>
+  <div class="tab" data-tab="logistics">Logistics</div>
+</div>
+
+<div class="content">
+
+<!-- ==================== TURNOV TAB ==================== -->
+<div id="tab-turnov">
+
+  <div class="alert-banner">
+    <strong>⚠️ April Seasonality Warning:</strong> Some attractions don't open until late April or May. Verify opening dates before each visit. Your dates: Apr 10–14.
+  </div>
+
+  <div class="section-label">Walkable from Apartment</div>
+
+  <!-- Valdštejn Castle -->
+  <div class="card">
+    <div class="carousel">
+      <div class="carousel-track">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Vald%C5%A1tejn_%C4%8Cesk%C3%BD_r%C3%A1j.jpg/960px-Vald%C5%A1tejn_%C4%8Cesk%C3%BD_r%C3%A1j.jpg" alt="Valdštejn Castle in Český ráj">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/8d/Hrad_Vald%C5%A1tejn%2C_leteck%C3%BD_sn%C3%ADmek_crop.jpg/960px-Hrad_Vald%C5%A1tejn%2C_leteck%C3%BD_sn%C3%ADmek_crop.jpg" alt="Valdštejn Castle aerial view">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/cf/Hrad_Vald%C5%A1tejn%2C_z%C5%99%C3%ADcenina_%28Ma%C5%A1ov%29%2C_Ma%C5%A1ov_4.JPG/960px-Hrad_Vald%C5%A1tejn%2C_z%C5%99%C3%ADcenina_%28Ma%C5%A1ov%29%2C_Ma%C5%A1ov_4.JPG" alt="Valdštejn Castle ruins">
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="card-title">Valdštejn Castle</div>
+      <div class="card-subtitle">Gothic castle ruins on sandstone cliff · est. 1260</div>
+      <div class="tags">
+        <span class="tag green">✅ Walkable</span>
+        <span class="tag green">Kid-Friendly</span>
+        <span class="tag yellow">⚠️ Check April hours</span>
+      </div>
+      <div class="card-desc">One of the oldest castles in Český Ráj, perched on sandstone rocks with a Baroque chapel and rock-carved rooms. The walk from Turnov is the real attraction — a beautiful forest trail via the Hlavatice viewpoint with panoramic views of the rock formations.</div>
+      <div class="stats">
+        <div class="stat">
+          <div class="stat-label">Distance</div>
+          <div class="stat-value">4 km</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Drive</div>
+          <div class="stat-value">8 min</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Walk</div>
+          <div class="stat-value">~50 min</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Without Car</div>
+          <div class="stat-value" style="color:var(--green)">Doable ✅</div>
+        </div>
+      </div>
+      <div class="expand-section" id="valdstejn-details">
+        <div style="padding-top:12px">
+          <div class="detail-row">
+            <div class="detail-icon">🥾</div>
+            <div class="detail-content">
+              <div class="detail-label">Walking Route</div>
+              <div class="detail-value">Follow the RED trail from Turnov square → Hlavatice viewpoint (1.4 km) → Valdštejn (2.9 km more). Gentle forest path. Kids can manage if you go slow — bring snacks.</div>
+            </div>
+          </div>
+          <div class="detail-row">
+            <div class="detail-icon">👶</div>
+            <div class="detail-content">
+              <div class="detail-label">Kid Factor</div>
+              <div class="detail-value">Accessible, not too steep. The castle has nooks and crannies to explore. Rock formations are visually exciting for kids. Thomas (4) can do the walk with breaks.</div>
+            </div>
+          </div>
+          <div class="detail-row">
+            <div class="detail-icon">📅</div>
+            <div class="detail-content">
+              <div class="detail-label">April Season</div>
+              <div class="detail-value">Typically opens weekends in April. The grounds and trail are accessible even if the castle interior is closed. Check hrad-valdstejn.cz closer to date.</div>
+            </div>
+          </div>
+          <div class="detail-row">
+            <div class="detail-icon">🍺</div>
+            <div class="detail-content">
+              <div class="detail-label">Beer Nearby</div>
+              <div class="detail-value">Small refreshment stand near the castle in season. Better beer options back in Turnov.</div>
+            </div>
+          </div>
+          <div class="verdict"><strong>Verdict:</strong> Must-do. The walk itself is the highlight — combine Valdštejn with the Hlavatice viewpoint as a half-day family outing. If kids are fresh, you can continue to Hrubá Skála (2.5 km more) or drive there separately.</div>
+        </div>
+      </div>
+      <div class="expand-toggle" onclick="toggle('valdstejn-details', this)">Show more ▾</div>
+    </div>
+  </div>
+
+  <!-- Turnov Museum -->
+  <div class="card">
+    <div class="carousel">
+      <div class="carousel-track">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/77/Turnov_muzeum_%C4%8Cesk%C3%A9ho_r%C3%A1je_2.jpg/960px-Turnov_muzeum_%C4%8Cesk%C3%A9ho_r%C3%A1je_2.jpg" alt="Muzeum Českého ráje exterior">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/67/Turnov_muzeum_%C4%8Cesk%C3%A9ho_r%C3%A1je_1.jpg/960px-Turnov_muzeum_%C4%8Cesk%C3%A9ho_r%C3%A1je_1.jpg" alt="Muzeum Českého ráje building">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Turnov_muzeum_%C4%8Cesk%C3%A9ho_r%C3%A1je_expozice_%282%29.jpg/960px-Turnov_muzeum_%C4%8Cesk%C3%A9ho_r%C3%A1je_expozice_%282%29.jpg" alt="Muzeum Českého ráje exhibition">
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="card-title">Muzeum Českého Ráje</div>
+      <div class="card-subtitle">Museum of Bohemian Paradise · Gems, minerals, history</div>
+      <div class="tags">
+        <span class="tag green">✅ 4 min walk</span>
+        <span class="tag green">Rainy Day Backup</span>
+        <span class="tag blue">Year-Round</span>
+      </div>
+      <div class="card-desc">Huge collection of precious stones, garnets, minerals, plus local archaeology and history. Turnov has been the center of Czech garnet and gem culture for centuries. Great rainy-day option and ties into the garnet theme at Happy Land.</div>
+      <div class="stats">
+        <div class="stat">
+          <div class="stat-label">Distance</div>
+          <div class="stat-value">300m</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Walk</div>
+          <div class="stat-value">4 min</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Without Car</div>
+          <div class="stat-value" style="color:var(--green)">Easy ✅</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Time Needed</div>
+          <div class="stat-value">1–2 hrs</div>
+        </div>
+      </div>
+      <div class="verdict"><strong>Verdict:</strong> Perfect arrival-day activity (Apr 10 after check-in) or rainy-day backup. Kids will like the gem/mineral displays. Low-effort, high-reward.</div>
+    </div>
+  </div>
+
+  <!-- Dlaskův statek -->
+  <div class="card">
+    <div class="carousel">
+      <div class="carousel-track">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/58/Dlaskuv_statek_zpredu.jpg/960px-Dlaskuv_statek_zpredu.jpg" alt="Dlaskův statek front view">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/Dol%C3%A1nky_-_Dlask%C5%AFv_statek_obr1.jpg/960px-Dol%C3%A1nky_-_Dlask%C5%AFv_statek_obr1.jpg" alt="Dlaskův statek historic farm">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/76/Dol%C3%A1nky_-_Dlask%C5%AFv_statek%2C_obytn%C3%A9_staven%C3%AD.jpg/960px-Dol%C3%A1nky_-_Dlask%C5%AFv_statek%2C_obytn%C3%A9_staven%C3%AD.jpg" alt="Dlaskův statek residential building">
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="card-title">Dlaskův statek</div>
+      <div class="card-subtitle">Historic Jizera-region farmstead · Open-air museum</div>
+      <div class="tags">
+        <span class="tag green">~40 min walk</span>
+        <span class="tag yellow">⚠️ Check season</span>
+        <span class="tag green">Kid-Friendly</span>
+      </div>
+      <div class="card-desc">A beautifully preserved traditional farm from the Jizera region, ~3 km from Turnov toward Železný Brod. Shows traditional rural Bohemian life — timber buildings, period furnishings, farm tools. Quick visit, combinable with a walk along the Jizera river.</div>
+      <div class="stats">
+        <div class="stat">
+          <div class="stat-label">Distance</div>
+          <div class="stat-value">3 km</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Drive</div>
+          <div class="stat-value">5 min</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Walk</div>
+          <div class="stat-value">~40 min</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Without Car</div>
+          <div class="stat-value" style="color:var(--yellow)">Walkable or taxi</div>
+        </div>
+      </div>
+      <div class="verdict"><strong>Verdict:</strong> Quick add-on, not a main event. Good if you want a mellow afternoon or need a short outing. Walk along the river is pleasant.</div>
+    </div>
+  </div>
+
+  <div class="section-label">Need Wheels (Drive or Taxi)</div>
+
+  <!-- Hrubá Skála -->
+  <div class="card">
+    <div class="carousel">
+      <div class="carousel-track">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1d/Z%C3%A1mek_Hrub%C3%A1_sk%C3%A1la.jpg/960px-Z%C3%A1mek_Hrub%C3%A1_sk%C3%A1la.jpg" alt="Hrubá Skála Castle">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/bf/Hrub%C3%A1_Sk%C3%A1la_Castle%2C_Czechia.jpg/960px-Hrub%C3%A1_Sk%C3%A1la_Castle%2C_Czechia.jpg" alt="Hrubá Skála Castle and rocks">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9b/Castle_Hrub%C3%A1_Sk%C3%A1la_in_the_evening.jpg/960px-Castle_Hrub%C3%A1_Sk%C3%A1la_in_the_evening.jpg" alt="Hrubá Skála Castle in the evening">
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="card-title">Hrubá Skála Castle + Rock City</div>
+      <div class="card-subtitle">Renaissance château on sandstone cliffs · Iconic Český Ráj views</div>
+      <div class="tags">
+        <span class="tag blue">6.5 km · 12 min drive</span>
+        <span class="tag green">Kid-Friendly Trails</span>
+        <span class="tag green">Open Year-Round</span>
+      </div>
+      <div class="card-desc">The postcard image of Český Ráj. A château (now a hotel) perched on massive sandstone pillars, surrounded by a "rock city" of towering stone formations with walking trails weaving through narrow passages and viewpoints. The rock formations are the main attraction — the castle is secondary.</div>
+      <div class="stats">
+        <div class="stat">
+          <div class="stat-label">Distance</div>
+          <div class="stat-value">6.5 km</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Drive</div>
+          <div class="stat-value">12 min</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Walk from Turnov</div>
+          <div class="stat-value">~1.5 hrs</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Without Car</div>
+          <div class="stat-value" style="color:var(--yellow)">Train + 25 min uphill walk</div>
+        </div>
+      </div>
+      <div class="expand-section" id="hrubaskala-details">
+        <div style="padding-top:12px">
+          <div class="detail-row">
+            <div class="detail-icon">🚂</div>
+            <div class="detail-content">
+              <div class="detail-label">Without a Car</div>
+              <div class="detail-value">Train from Turnov to Hrubá Skála station (limited frequency), then 20–25 min uphill walk. Or walk from Turnov via Valdštejn (~6.5 km trail) — beautiful but long for kids. Pre-booked taxi ~€10–15 each way.</div>
+            </div>
+          </div>
+          <div class="detail-row">
+            <div class="detail-icon">👶</div>
+            <div class="detail-content">
+              <div class="detail-label">Kid Factor</div>
+              <div class="detail-value">The rock trails have short and long loops. Short loop (~30 min) is very doable. Kids love the narrow passages between rocks, stairs carved into stone, and peekaboo viewpoints. Some sections have metal railings.</div>
+            </div>
+          </div>
+          <div class="detail-row">
+            <div class="detail-icon">🏗️</div>
+            <div class="detail-content">
+              <div class="detail-label">Architecture Note</div>
+              <div class="detail-value">The château itself is a Renaissance rebuild on medieval foundations, dramatically perched on sandstone. Now an EA Hotel — you can visit the courtyard and tower for views. The geology-meets-architecture angle is right up Abe's alley.</div>
+            </div>
+          </div>
+          <div class="detail-row">
+            <div class="detail-icon">🔗</div>
+            <div class="detail-content">
+              <div class="detail-label">Combine With</div>
+              <div class="detail-value">Valdštejn Castle (2.5 km trail between them). Drive to Hrubá Skála, walk the rock city, then hike to Valdštejn and back — or vice versa.</div>
+            </div>
+          </div>
+          <div class="verdict"><strong>Verdict:</strong> Must-do, top priority. This is the defining experience of Český Ráj. The rock city trails are magical. Plan a full morning here. Combine with Valdštejn for a full day.</div>
+        </div>
+      </div>
+      <div class="expand-toggle" onclick="toggle('hrubaskala-details', this)">Show more ▾</div>
+    </div>
+  </div>
+
+  <!-- Happy Land -->
+  <div class="card">
+    <div class="carousel">
+      <div class="carousel-track">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/dd/Doln%C3%AD-Bukovina-stodola2019.jpg/960px-Doln%C3%AD-Bukovina-stodola2019.jpg" alt="Šťastná země barn in Dolní Bukovina">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6f/Doln%C3%AD_Bukovina%2C_koupali%C5%A1t%C4%9B.jpg/960px-Doln%C3%AD_Bukovina%2C_koupali%C5%A1t%C4%9B.jpg" alt="Dolní Bukovina swimming area">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/fa/Doln%C3%AD_Bukovina%2C_Z%C3%A1brdka.jpg/960px-Doln%C3%AD_Bukovina%2C_Z%C3%A1brdka.jpg" alt="Dolní Bukovina countryside">
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="card-title">Šťastná země (Happy Land)</div>
+      <div class="card-subtitle">Radvánovice · Kids' adventure park with garnet mining</div>
+      <div class="tags">
+        <span class="tag blue">7 km · 10 min drive</span>
+        <span class="tag green">✅✅ Best for Kids</span>
+        <span class="tag red">⚠️ May NOT be open Apr 10–14</span>
+      </div>
+      <div class="card-desc">Massive outdoor kids' paradise: wooden castle with towers, air trampolines, a dwarf village, sand mine where kids dig for real Czech garnets, contact zoo, Celtic village, geopark trail, observation tower with water slide. Purpose-built for exactly your kids' ages.</div>
+      <div class="stats">
+        <div class="stat">
+          <div class="stat-label">Distance</div>
+          <div class="stat-value">7 km</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Drive</div>
+          <div class="stat-value">10 min</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Walk</div>
+          <div class="stat-value">Too far for kids</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Without Car</div>
+          <div class="stat-value" style="color:var(--red)">Taxi only</div>
+        </div>
+      </div>
+      <div class="expand-section" id="happyland-details">
+        <div style="padding-top:12px">
+          <div class="detail-row">
+            <div class="detail-icon">⚠️</div>
+            <div class="detail-content">
+              <div class="detail-label">Season Warning</div>
+              <div class="detail-value"><strong>Critical:</strong> The park typically opens late April or May. Your dates (Apr 10–14) may be too early. Check stastnazeme.cz or their Facebook page before going. This could be a total miss.</div>
+            </div>
+          </div>
+          <div class="detail-row">
+            <div class="detail-icon">👶</div>
+            <div class="detail-content">
+              <div class="detail-label">Kid Factor</div>
+              <div class="detail-value">This is THE kid destination. Eloise (6) will love the wooden castle, climbing frames, and garnet mining. Thomas (4) will love the contact zoo, trampolines, and dwarf village. You could easily spend 3–4 hours here.</div>
+            </div>
+          </div>
+          <div class="detail-row">
+            <div class="detail-icon">💎</div>
+            <div class="detail-content">
+              <div class="detail-label">Garnet Mining</div>
+              <div class="detail-value">Kids dig in sand for real Czech garnets to take home. This is the "Radvanovic garnet mine" mentioned in your research. Not a real mine — it's a managed dig area for kids. They find actual garnets.</div>
+            </div>
+          </div>
+          <div class="detail-row">
+            <div class="detail-icon">🎨</div>
+            <div class="detail-content">
+              <div class="detail-label">Craft Workshop</div>
+              <div class="detail-value">Kids can make wooden swords, shields, horses, mandalas, and unicorns in the on-site workshop.</div>
+            </div>
+          </div>
+          <div class="verdict"><strong>Verdict:</strong> Would be #1 priority for the kids — IF it's open. Check the season before planning around it. If closed, the garnet-mining experience is a loss with no real substitute.</div>
+        </div>
+      </div>
+      <div class="expand-toggle" onclick="toggle('happyland-details', this)">Show more ▾</div>
+    </div>
+  </div>
+
+  <!-- Trosky -->
+  <div class="card">
+    <div class="carousel">
+      <div class="carousel-track">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a3/Trosky002.jpg/960px-Trosky002.jpg" alt="Trosky Castle twin towers">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/52/Hrad_Trosky%2C_leteck%C3%BD_sn%C3%ADmek.jpg/960px-Hrad_Trosky%2C_leteck%C3%BD_sn%C3%ADmek.jpg" alt="Trosky Castle aerial view">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/ef/Trosky_Castle_02.jpg/960px-Trosky_Castle_02.jpg" alt="Trosky Castle ruins">
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="card-title">Trosky Castle</div>
+      <div class="card-subtitle">Twin volcanic towers · The icon of Český Ráj</div>
+      <div class="tags">
+        <span class="tag blue">13 km · 18 min drive</span>
+        <span class="tag orange">⚠️ Steep climb</span>
+        <span class="tag yellow">⚠️ Check April hours</span>
+      </div>
+      <div class="card-desc">The most recognizable silhouette in Bohemia — two volcanic basalt towers ("Baba" and "Panna") rising from the landscape, crowned with medieval castle ruins. Dramatic and photogenic. But the climb to the towers is steep and there's no way around it.</div>
+      <div class="stats">
+        <div class="stat">
+          <div class="stat-label">Distance</div>
+          <div class="stat-value">13 km</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Drive</div>
+          <div class="stat-value">18 min</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Walk</div>
+          <div class="stat-value">Not feasible</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Without Car</div>
+          <div class="stat-value" style="color:var(--red)">Very difficult</div>
+        </div>
+      </div>
+      <div class="expand-section" id="trosky-details">
+        <div style="padding-top:12px">
+          <div class="detail-row">
+            <div class="detail-icon">👶</div>
+            <div class="detail-content">
+              <div class="detail-label">Kid Factor</div>
+              <div class="detail-value"><strong>Mixed.</strong> Eloise (6) could probably do it with encouragement. Thomas (4) might struggle with the steep stone stairs to the towers. You might need to carry him for sections, which at 6'8" on narrow medieval stairs... consider carefully. The view from below is still impressive.</div>
+            </div>
+          </div>
+          <div class="detail-row">
+            <div class="detail-icon">🚌</div>
+            <div class="detail-content">
+              <div class="detail-label">Without a Car</div>
+              <div class="detail-value">Bus to Rovensko pod Troskami + 5 km walk to the castle. Or train + bus with transfers (~1h 40m). Not practical with kids. Taxi ~€20–25 each way.</div>
+            </div>
+          </div>
+          <div class="detail-row">
+            <div class="detail-icon">📅</div>
+            <div class="detail-content">
+              <div class="detail-label">April Season</div>
+              <div class="detail-value">Typically open April weekends only. Check hrad-trosky.cz. Even if closed, you can see the towers from outside — worth the drive for the view alone.</div>
+            </div>
+          </div>
+          <div class="detail-row">
+            <div class="detail-icon">💡</div>
+            <div class="detail-content">
+              <div class="detail-label">Pro Tip</div>
+              <div class="detail-value">Consider: adults take turns climbing while one stays with Thomas. Or just drive there for the view and photo op without climbing. It's still iconic from the parking area.</div>
+            </div>
+          </div>
+          <div class="verdict"><strong>Verdict:</strong> Worth seeing, but manage expectations. The drive alone is beautiful. If the castle is open, adults and Eloise can climb while Allie/grandparent stays with Thomas. Don't force it with a tired 4-year-old.</div>
+        </div>
+      </div>
+      <div class="expand-toggle" onclick="toggle('trosky-details', this)">Show more ▾</div>
+    </div>
+  </div>
+
+  <!-- Prachovské skály -->
+  <div class="card">
+    <div class="carousel">
+      <div class="carousel-track">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d8/Prachovsk%C3%A9_sk%C3%A1ly%2C_sk%C3%A1la_VII.jpg/960px-Prachovsk%C3%A9_sk%C3%A1ly%2C_sk%C3%A1la_VII.jpg" alt="Prachovské skály rock formation">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b7/Prachovsk%C3%A9_sk%C3%A1ly-32-2012-gje.jpg/960px-Prachovsk%C3%A9_sk%C3%A1ly-32-2012-gje.jpg" alt="Prachov Rocks trail">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Emperor%27s_Passage%2C_Prachov_Rocks.jpg/960px-Emperor%27s_Passage%2C_Prachov_Rocks.jpg" alt="Emperor's Passage, Prachov Rocks">
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="card-title">Prachovské skály (Prachov Rocks)</div>
+      <div class="card-subtitle">Sandstone rock city · Trails through stone labyrinths</div>
+      <div class="tags">
+        <span class="tag blue">20 km · 25 min drive</span>
+        <span class="tag green">Kid-Friendly Trails</span>
+        <span class="tag green">Open April</span>
+      </div>
+      <div class="card-desc">The largest and most famous "rock city" in Český Ráj — a labyrinth of sandstone towers, narrow passages, viewpoints, and forested trails. Two marked loops: a shorter one (~1 hr) and a longer one (~2 hrs). Different vibe than Hrubá Skála — more expansive, more "lost in a stone forest" feeling.</div>
+      <div class="stats">
+        <div class="stat">
+          <div class="stat-label">Distance</div>
+          <div class="stat-value">20 km</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Drive</div>
+          <div class="stat-value">25 min</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Walk</div>
+          <div class="stat-value">Not feasible</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Without Car</div>
+          <div class="stat-value" style="color:var(--red)">Not practical</div>
+        </div>
+      </div>
+      <div class="expand-section" id="prachov-details">
+        <div style="padding-top:12px">
+          <div class="detail-row">
+            <div class="detail-icon">👶</div>
+            <div class="detail-content">
+              <div class="detail-label">Kid Factor</div>
+              <div class="detail-value">Short loop is very doable with kids. Narrow passages between rocks are thrilling — kids squeeze through while adults duck. Some stairs but manageable. Thomas (4) will love hiding in rock crevices.</div>
+            </div>
+          </div>
+          <div class="detail-row">
+            <div class="detail-icon">🆚</div>
+            <div class="detail-content">
+              <div class="detail-label">vs. Hrubá Skála</div>
+              <div class="detail-value">Hrubá Skála has the castle + dramatic perch. Prachov Rocks are more about immersion in the rock formations themselves — more trails, more variety, bigger area. If you can only do one, Hrubá Skála. If you have time, Prachov is worth a half-day.</div>
+            </div>
+          </div>
+          <div class="detail-row">
+            <div class="detail-icon">💰</div>
+            <div class="detail-content">
+              <div class="detail-label">Admission</div>
+              <div class="detail-value">Small entrance fee (~80–120 CZK/adult). Parking available at the entrance.</div>
+            </div>
+          </div>
+          <div class="verdict"><strong>Verdict:</strong> Great half-day trip if you have the car and a free morning. Not essential if you've already done Hrubá Skála, but a different and worthwhile experience. The short loop is perfect for kids.</div>
+        </div>
+      </div>
+      <div class="expand-toggle" onclick="toggle('prachov-details', this)">Show more ▾</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ==================== PRAGUE TAB ==================== -->
+<div id="tab-prague" class="hidden">
+
+  <div class="section-label">Walking Distance from Kaiserstein (Malá Strana)</div>
+
+  <!-- Prague Castle -->
+  <div class="card">
+    <div class="carousel">
+      <div class="carousel-track">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/80/Czech-2013-Prague-Prague_Castle_at_dusk.jpg/960px-Czech-2013-Prague-Prague_Castle_at_dusk.jpg" alt="Prague Castle at dusk">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/3b/20190817_View_of_Prague_Castle_from_Pet%C5%99%C3%ADn_1345_5542.jpg/960px-20190817_View_of_Prague_Castle_from_Pet%C5%99%C3%ADn_1345_5542.jpg" alt="Prague Castle from Petřín">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f4/PragueCathedral03.jpg/960px-PragueCathedral03.jpg" alt="St. Vitus Cathedral">
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="card-title">Prague Castle (Pražský hrad)</div>
+      <div class="card-subtitle">Largest castle complex in the world · ~15 min walk uphill</div>
+      <div class="tags">
+        <span class="tag green">Walk from apartment</span>
+        <span class="tag yellow">Manage kid energy</span>
+        <span class="tag blue">Abe knows this</span>
+      </div>
+      <div class="card-desc">You're staying at the base of the castle hill. Walk up Nerudova street (past the in-laws' place!) to the castle. St. Vitus Cathedral, Golden Lane, the gardens. Abe's been twice — focus on what's new: the kids' experience, the southern gardens (often overlooked), the Royal Garden.</div>
+      <div class="stats">
+        <div class="stat">
+          <div class="stat-label">Walk</div>
+          <div class="stat-value">~15 min uphill</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Time Needed</div>
+          <div class="stat-value">2–3 hrs</div>
+        </div>
+      </div>
+      <div class="verdict"><strong>Verdict:</strong> Unavoidable and worth doing — you literally live at its doorstep. Go early morning before crowds. Golden Lane is touristy but kids enjoy the tiny houses. Don't try to do everything — pick 2-3 things.</div>
+    </div>
+  </div>
+
+  <!-- Petřín Hill -->
+  <div class="card">
+    <div class="carousel">
+      <div class="carousel-track">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e7/Pet%C5%99%C3%ADn_tower_05_2018.jpg/960px-Pet%C5%99%C3%ADn_tower_05_2018.jpg" alt="Petřín Tower">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/20/Prague_07-2016_View_from_Petrinska_Tower_img2.jpg/960px-Prague_07-2016_View_from_Petrinska_Tower_img2.jpg" alt="View from Petřín Tower">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1d/Prague_07-2016_View_from_Lesser_Town_Nicholas_Church_img5.jpg/960px-Prague_07-2016_View_from_Lesser_Town_Nicholas_Church_img5.jpg" alt="Petřín Hill from Lesser Town">
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="card-title">Petřín Hill</div>
+      <div class="card-subtitle">Park, lookout tower, mirror maze, funicular · ~10 min walk to base</div>
+      <div class="tags">
+        <span class="tag green">Walk from apartment</span>
+        <span class="tag green">✅✅ Great for Kids</span>
+        <span class="tag blue">Year-Round</span>
+      </div>
+      <div class="card-desc">A huge green hill rising right behind your apartment. Take the funicular up (kids love it), visit the mini Eiffel Tower (Petřín Lookout Tower — 299 steps!), the mirror maze (Zrcadlové bludiště — hilarious for kids), then walk down through orchards and gardens. Playground at the base.</div>
+      <div class="stats">
+        <div class="stat">
+          <div class="stat-label">Walk to base</div>
+          <div class="stat-value">~10 min</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Time Needed</div>
+          <div class="stat-value">2–3 hrs</div>
+        </div>
+      </div>
+      <div class="verdict"><strong>Verdict:</strong> Top-3 kid activity in Prague. Funicular + tower + mirror maze is a perfect combo. Go on a clear day for the views. Easy bail point — if kids are tired, just walk downhill through the park back to the apartment.</div>
+    </div>
+  </div>
+
+  <!-- Kampa Island -->
+  <div class="card">
+    <div class="carousel">
+      <div class="carousel-track">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/0e/Praha_-_Kampa_-_View_NE.jpg/960px-Praha_-_Kampa_-_View_NE.jpg" alt="Kampa Island view">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/Praha_-_Kampa_-_View_NNE.jpg/960px-Praha_-_Kampa_-_View_NNE.jpg" alt="Kampa Island panorama">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Praha_-_Kampa_Park_along_the_Vltava_River_04.jpg/960px-Praha_-_Kampa_Park_along_the_Vltava_River_04.jpg" alt="Kampa Park along the Vltava">
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="card-title">Kampa Island & Lennon Wall</div>
+      <div class="card-subtitle">Park, Lennon Wall, David Černý babies, watermill · 5 min walk</div>
+      <div class="tags">
+        <span class="tag green">5 min walk</span>
+        <span class="tag green">Great for Kids</span>
+        <span class="tag green">Free</span>
+      </div>
+      <div class="card-desc">A peaceful island park right next to your apartment, separated from Malá Strana by a narrow channel ("Čertovka" — Devil's Stream). Kids can run around on the grass, see the giant crawling baby sculptures by David Černý, and you can stroll past the historic watermill. The Lennon Wall is right there too — bring chalk!</div>
+      <div class="stats">
+        <div class="stat">
+          <div class="stat-label">Walk</div>
+          <div class="stat-value">5 min</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Time Needed</div>
+          <div class="stat-value">30 min–1 hr</div>
+        </div>
+      </div>
+      <div class="verdict"><strong>Verdict:</strong> Not a destination per se — more of a daily hang. Perfect for jet-lag day, before/after dinner stroll, or whenever kids need to run. Kampa Museum has modern art if adults want culture while kids play in the park.</div>
+    </div>
+  </div>
+
+  <!-- Charles Bridge -->
+  <div class="card">
+    <div class="carousel">
+      <div class="carousel-track">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/72/North_view_of_Charles_Bridge_from_M%C3%A1nes%C5%AFv_most%2C_Prague_20160808_1.jpg/960px-North_view_of_Charles_Bridge_from_M%C3%A1nes%C5%AFv_most%2C_Prague_20160808_1.jpg" alt="Charles Bridge from Mánesův most">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/76/Prague_Charles_Bridge_2021_12.jpg/960px-Prague_Charles_Bridge_2021_12.jpg" alt="Charles Bridge">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/20/Prague_07-2016_View_from_Petrinska_Tower_img2.jpg/960px-Prague_07-2016_View_from_Petrinska_Tower_img2.jpg" alt="Charles Bridge from above">
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="card-title">Charles Bridge (Karlův most)</div>
+      <div class="card-subtitle">Gothic stone bridge · 30 Baroque statues · ~5 min walk</div>
+      <div class="tags">
+        <span class="tag green">5 min walk</span>
+        <span class="tag blue">Abe knows this</span>
+        <span class="tag yellow">Crowded midday</span>
+      </div>
+      <div class="card-desc">You'll cross this every time you go to Old Town. The key is WHEN: go at sunrise (~6:15 AM in April) or after 8 PM for the empty, magical experience. Midday it's a tourist gauntlet. Touch the brass plaque of St. John of Nepomuk for good luck — kids can reach it. Climb the Old Town Bridge Tower for incredible views.</div>
+      <div class="stats">
+        <div class="stat">
+          <div class="stat-label">Walk</div>
+          <div class="stat-value">5 min</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Best Time</div>
+          <div class="stat-value">Sunrise or after 8 PM</div>
+        </div>
+      </div>
+      <div class="verdict"><strong>Verdict:</strong> You'll see it regardless — it's between you and Old Town. One early morning trip (Abe solo? or with FIL for coffee?) to see it empty is worth it. Bridge Tower is worth the climb.</div>
+    </div>
+  </div>
+
+  <div class="section-label">Short Transit / Tram Ride</div>
+
+  <!-- Vyšehrad -->
+  <div class="card">
+    <div class="carousel">
+      <div class="carousel-track">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e6/Praha_2%2C_Pevnost_Vy%C5%A1ehrad_20170808_014.jpg/960px-Praha_2%2C_Pevnost_Vy%C5%A1ehrad_20170808_014.jpg" alt="Vyšehrad fortress">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/Vysehrad_Prague_CZ_from_Podoli_086.jpg/960px-Vysehrad_Prague_CZ_from_Podoli_086.jpg" alt="Vyšehrad from Podolí">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/24/Czech-2013-Prague-Vy%C5%A1ehrad-Saints_Peter_and_Paul_%28portal%29.jpg/960px-Czech-2013-Prague-Vy%C5%A1ehrad-Saints_Peter_and_Paul_%28portal%29.jpg" alt="Vyšehrad Basilica of Saints Peter and Paul">
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="card-title">Vyšehrad</div>
+      <div class="card-subtitle">Ancient hilltop fortress · Quieter alternative to Prague Castle</div>
+      <div class="tags">
+        <span class="tag blue">~20 min by tram</span>
+        <span class="tag green">Kid-Friendly</span>
+        <span class="tag green">Great Playground</span>
+      </div>
+      <div class="card-desc">The "other castle" that most tourists skip. Ancient fortress on a cliff above the Vltava with incredible river views, a Romanesque rotunda, the famous cemetery (Dvořák, Mucha, Smetana), casemates (underground tunnels), and — crucially — a really good playground inside the fortress walls. Much less crowded than Prague Castle.</div>
+      <div class="stats">
+        <div class="stat">
+          <div class="stat-label">Getting There</div>
+          <div class="stat-value">Tram + short walk</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Time Needed</div>
+          <div class="stat-value">2–3 hrs</div>
+        </div>
+      </div>
+      <div class="verdict"><strong>Verdict:</strong> Highly recommended for Abe specifically — less touristy, deeper history, incredible architecture. The playground makes it a family win. FIL will like the rampart walks and views. Go on a day when you want to escape the Malá Strana/Old Town bubble.</div>
+    </div>
+  </div>
+
+  <!-- Střelecký ostrov -->
+  <div class="card">
+    <div class="carousel">
+      <div class="carousel-track">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5d/Praha%2C_St%C5%99eleck%C3%BD_ostrov%2C_most_Legi%C3%AD_IV.jpg/960px-Praha%2C_St%C5%99eleck%C3%BD_ostrov%2C_most_Legi%C3%AD_IV.jpg" alt="Střelecký ostrov and Most Legií">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a0/Praha_-_Most_Legi%C3%AD_-_View_NE_on_St%C5%99eleck%C3%BD_ostrov%2C_Hrad%C4%8Dany_%26_Karl%C5%AFv_most.jpg/960px-Praha_-_Most_Legi%C3%AD_-_View_NE_on_St%C5%99eleck%C3%BD_ostrov%2C_Hrad%C4%8Dany_%26_Karl%C5%AFv_most.jpg" alt="Střelecký ostrov with Hradčany and Charles Bridge">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/79/Praha_St%C5%99eleck%C3%BD_ostrov_sn%C3%ADh_2010_2.jpg/960px-Praha_St%C5%99eleck%C3%BD_ostrov_sn%C3%ADh_2010_2.jpg" alt="Střelecký ostrov in winter">
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="card-title">Střelecký ostrov (Shooters Island)</div>
+      <div class="card-subtitle">River island park with playground · 10 min walk</div>
+      <div class="tags">
+        <span class="tag green">10 min walk</span>
+        <span class="tag green">Great Playground</span>
+        <span class="tag green">Free</span>
+      </div>
+      <div class="card-desc">Small island in the Vltava with a well-maintained playground, café, and views of the National Theatre and the bridges. Accessed from Most Legií bridge. Perfect mid-day break point — kids play while adults sit with coffee/beer. Much less known than Kampa.</div>
+      <div class="stats">
+        <div class="stat">
+          <div class="stat-label">Walk</div>
+          <div class="stat-value">10 min</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Time Needed</div>
+          <div class="stat-value">1–2 hrs</div>
+        </div>
+      </div>
+      <div class="verdict"><strong>Verdict:</strong> Perfect playground break. When kids are melting down during a day of sightseeing, detour here. Beer for adults, swings for kids, everyone recharges.</div>
+    </div>
+  </div>
+
+  <!-- National Technical Museum -->
+  <div class="card">
+    <div class="carousel">
+      <div class="carousel-track">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6d/Narodni_technicke_muzeum_Praha_21092015_%28Foto_Hilarmont%29.jpg/960px-Narodni_technicke_muzeum_Praha_21092015_%28Foto_Hilarmont%29.jpg" alt="National Technical Museum exterior">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f1/View_in_the_National_Technical_Museum_%28Prague%29.jpg/960px-View_in_the_National_Technical_Museum_%28Prague%29.jpg" alt="National Technical Museum interior hall">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Praha%2C_Hole%C5%A1ovice%2C_zem%C4%9Bd%C4%9Blsk%C3%A9_a_technick%C3%A9_muzeum.JPG/960px-Praha%2C_Hole%C5%A1ovice%2C_zem%C4%9Bd%C4%9Blsk%C3%A9_a_technick%C3%A9_muzeum.JPG" alt="National Technical Museum building">
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="card-title">National Technical Museum</div>
+      <div class="card-subtitle">Trains, planes, cars, machines · Indoor rainy-day option</div>
+      <div class="tags">
+        <span class="tag blue">~15 min tram</span>
+        <span class="tag green">Great for Kids</span>
+        <span class="tag green">Rainy Day</span>
+      </div>
+      <div class="card-desc">Enormous hall filled with vintage cars, motorcycles, steam trains, biplanes, and a printing press. Thomas (4) will lose his mind. Interactive exhibits, a simulated mine in the basement. One of the best rainy-day options in Prague for families.</div>
+      <div class="stats">
+        <div class="stat">
+          <div class="stat-label">Getting There</div>
+          <div class="stat-value">Tram 22 → Letná</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Time Needed</div>
+          <div class="stat-value">2–3 hrs</div>
+        </div>
+      </div>
+      <div class="verdict"><strong>Verdict:</strong> Keep in your back pocket for a rainy day. Thomas-specific win. Combine with a walk through Letná Park (beer garden with views!) afterward if weather clears.</div>
+    </div>
+  </div>
+
+  <!-- Letná Park -->
+  <div class="card">
+    <div class="carousel">
+      <div class="carousel-track">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Praha_-_Letn%C3%A1_Park_-_View_South.jpg/960px-Praha_-_Letn%C3%A1_Park_-_View_South.jpg" alt="Letná Park panoramic view over Prague">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/be/Praha%2C_Letn%C3%A1%2C_Metronom.jpg/960px-Praha%2C_Letn%C3%A1%2C_Metronom.jpg" alt="Letná Metronome">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e2/Praha%2C_Letn%C3%A1%2C_sad.jpg/960px-Praha%2C_Letn%C3%A1%2C_sad.jpg" alt="Letná Park garden paths">
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="card-title">Letná Park & Beer Garden</div>
+      <div class="card-subtitle">Best views in Prague + best beer garden · ~20 min walk or tram</div>
+      <div class="tags">
+        <span class="tag green">Beer + Views</span>
+        <span class="tag green">Playground</span>
+        <span class="tag blue">Abe + FIL</span>
+      </div>
+      <div class="card-desc">Expansive hilltop park above the Vltava with THE panoramic view of Prague's bridges. The beer garden (Letná Beer Garden) has cheap draft beer, sausages, and an unbeatable sunset view. There's a playground in the park. The Prague Metronome (giant ticking metronome where Stalin's statue once stood) is an architecture conversation starter.</div>
+      <div class="stats">
+        <div class="stat">
+          <div class="stat-label">Getting There</div>
+          <div class="stat-value">20 min walk or tram</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Time Needed</div>
+          <div class="stat-value">1–2 hrs</div>
+        </div>
+      </div>
+      <div class="verdict"><strong>Verdict:</strong> Abe + FIL beer pilgrimage. Late afternoon — grab a bench, watch the sunset over the bridges with a Pilsner. Kids play in the park. Everyone wins. Combine with the Technical Museum if weather cooperates.</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ==================== LOGISTICS TAB ==================== -->
+<div id="tab-logistics" class="hidden">
+
+  <div class="section-label">Accommodations</div>
+
+  <div class="card">
+    <div class="card-body">
+      <div class="card-title">Kaiserstein Palace Apartments</div>
+      <div class="card-subtitle">Malostranské nám. 23, Malá Strana · Apr 3–10 (7 nights)</div>
+      <div class="tags"><span class="tag blue">Prague Base</span></div>
+      <div class="detail-row">
+        <div class="detail-icon">🔑</div>
+        <div class="detail-content">
+          <div class="detail-value">Check-in 3 PM · Check-out 11 AM · Executive Apt, 2 bath · Conf# 2363379152</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-body">
+      <div class="card-title">Apartments Šimákova Vila</div>
+      <div class="card-subtitle">Skálova 463, Turnov · Apr 10–15 (5 nights)</div>
+      <div class="tags"><span class="tag blue">Turnov Base</span><span class="tag green">Free Parking</span></div>
+      <div class="detail-row">
+        <div class="detail-icon">🔑</div>
+        <div class="detail-content">
+          <div class="detail-value">Check-in 3–8 PM · 3-bed apt, garden view · All 6 guests together · Conf# 4427184951 · Phone: +420 602 747 563</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-body">
+      <div class="card-title">Andaz Prague (FHR)</div>
+      <div class="card-subtitle">Senovážné nám. 976/31, Nové Město · Apr 15–16 (1 night)</div>
+      <div class="tags"><span class="tag blue">Last Night</span><span class="tag green">Business Class Perks</span></div>
+      <div class="detail-row">
+        <div class="detail-icon">🔑</div>
+        <div class="detail-content">
+          <div class="detail-value">Check-in 3 PM · Family Room · FHR: upgrade + breakfast + credit · Conf# 1510018A010664</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-label">Flights</div>
+
+  <div class="card">
+    <div class="card-body">
+      <div class="card-title">✈️ Outbound · Apr 2–3</div>
+      <div class="card-subtitle">Economy · Austrian Airlines · Ref: CXA674</div>
+      <div class="detail-row">
+        <div class="detail-icon">1️⃣</div>
+        <div class="detail-content"><div class="detail-value">IAD → VIE · OS 042 · Depart 5:25 PM · Arrive 8:15 AM+1 · 8h 50m</div></div>
+      </div>
+      <div class="detail-row">
+        <div class="detail-icon">2️⃣</div>
+        <div class="detail-content"><div class="detail-value">VIE → PRG · OS 643 · Depart 9:45 AM · Arrive 10:35 AM · 50m</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-body">
+      <div class="card-title">✈️ Return · Apr 16</div>
+      <div class="card-subtitle">Business Class 🎉 · Lufthansa · Ref: CXA674</div>
+      <div class="detail-row">
+        <div class="detail-icon">1️⃣</div>
+        <div class="detail-content"><div class="detail-value">PRG → FRA · LH 1393 · Depart 9:10 AM · ~1h 10m</div></div>
+      </div>
+      <div class="detail-row">
+        <div class="detail-icon">2️⃣</div>
+        <div class="detail-content"><div class="detail-value">FRA → IAD · LH 418 · Depart 1:10 PM · Arrive 4:05 PM · ~9h 55m</div></div>
+      </div>
+      <div class="detail-row">
+        <div class="detail-icon">🛋️</div>
+        <div class="detail-content"><div class="detail-value">FRA layover: 2h 50m · Lufthansa Business Lounge access</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-label">Key Dates</div>
+
+  <div class="card">
+    <div class="card-body" style="font-size:13px;">
+      <div class="detail-row"><div class="detail-icon">📅</div><div class="detail-content"><div class="detail-value"><strong>Apr 3 (Fri)</strong> — Land 10:35. Blacklane → Malá Strana. Check-in 3 PM.</div></div></div>
+      <div class="detail-row"><div class="detail-icon">📅</div><div class="detail-content"><div class="detail-value"><strong>Apr 4–9</strong> — Prague days (6 full days)</div></div></div>
+      <div class="detail-row"><div class="detail-icon">🚗</div><div class="detail-content"><div class="detail-value"><strong>Apr 10 (Fri)</strong> — Check out 11 AM → Drive/train to Turnov. Check-in 3 PM.</div></div></div>
+      <div class="detail-row"><div class="detail-icon">📅</div><div class="detail-content"><div class="detail-value"><strong>Apr 11–14</strong> — Turnov / Český Ráj (4 full days)</div></div></div>
+      <div class="detail-row"><div class="detail-icon">🚗</div><div class="detail-content"><div class="detail-value"><strong>Apr 15 (Wed)</strong> — Check out 10 AM → Drive to Prague. Andaz check-in 3 PM. Last evening.</div></div></div>
+      <div class="detail-row"><div class="detail-icon">✈️</div><div class="detail-content"><div class="detail-value"><strong>Apr 16 (Thu)</strong> — Depart PRG 9:10 AM. Business class home. Arrive IAD ~4:05 PM.</div></div></div>
+    </div>
+  </div>
+
+</div>
+
+</div>
+
+<script>
+  // Tab switching
+  document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      const target = tab.dataset.tab;
+      document.querySelectorAll('[id^="tab-"]').forEach(panel => {
+        panel.classList.toggle('hidden', panel.id !== 'tab-' + target);
+      });
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  });
+
+  // Expand/collapse
+  function toggle(id, btn) {
+    const section = document.getElementById(id);
+    section.classList.toggle('open');
+    btn.textContent = section.classList.contains('open') ? 'Show less ▴' : 'Show more ▾';
+  }
+
+  // Carousel initialization
+  document.querySelectorAll('.carousel').forEach(carousel => {
+    const track = carousel.querySelector('.carousel-track');
+    const imgs = Array.from(track.querySelectorAll('img'));
+    let current = 0;
+    let loadedCount = 0;
+    const validImgs = [];
+
+    // Handle image load/error to filter out broken images
+    imgs.forEach(img => {
+      img.addEventListener('load', () => { validImgs.push(img); checkReady(); });
+      img.addEventListener('error', () => { img.remove(); checkReady(); });
+      loadedCount++;
+    });
+
+    function checkReady() {
+      const remaining = track.querySelectorAll('img');
+      if (remaining.length === 0) {
+        // All images failed — show emoji placeholder
+        carousel.innerHTML = '<div class="card-image-placeholder">📷</div>';
+        return;
+      }
+      // Only build controls once all images have loaded or errored
+      const loaded = Array.from(remaining).filter(i => i.complete);
+      const pending = Array.from(remaining).filter(i => !i.complete);
+      if (pending.length === 0) buildControls(carousel, track, remaining.length);
+    }
+
+    function buildControls(carousel, track, count) {
+      if (count <= 1) return; // No nav needed for single image
+
+      // Create prev/next buttons
+      const prevBtn = document.createElement('button');
+      prevBtn.className = 'carousel-btn prev';
+      prevBtn.innerHTML = '‹';
+      prevBtn.addEventListener('click', e => { e.stopPropagation(); go(-1); });
+
+      const nextBtn = document.createElement('button');
+      nextBtn.className = 'carousel-btn next';
+      nextBtn.innerHTML = '›';
+      nextBtn.addEventListener('click', e => { e.stopPropagation(); go(1); });
+
+      // Create dots
+      const dots = document.createElement('div');
+      dots.className = 'carousel-dots';
+      for (let i = 0; i < count; i++) {
+        const dot = document.createElement('div');
+        dot.className = 'carousel-dot' + (i === 0 ? ' active' : '');
+        dot.addEventListener('click', e => { e.stopPropagation(); goTo(i); });
+        dots.appendChild(dot);
+      }
+
+      carousel.appendChild(prevBtn);
+      carousel.appendChild(nextBtn);
+      carousel.appendChild(dots);
+
+      function go(dir) {
+        current = (current + dir + count) % count;
+        update();
+      }
+
+      function goTo(idx) {
+        current = idx;
+        update();
+      }
+
+      function update() {
+        track.style.transform = `translateX(-${current * 100}%)`;
+        dots.querySelectorAll('.carousel-dot').forEach((d, i) => {
+          d.classList.toggle('active', i === current);
+        });
+      }
+
+      // Touch/swipe support
+      let startX = 0, startY = 0, isDragging = false;
+      carousel.addEventListener('touchstart', e => {
+        startX = e.touches[0].clientX;
+        startY = e.touches[0].clientY;
+        isDragging = true;
+      }, { passive: true });
+
+      carousel.addEventListener('touchend', e => {
+        if (!isDragging) return;
+        isDragging = false;
+        const dx = e.changedTouches[0].clientX - startX;
+        const dy = e.changedTouches[0].clientY - startY;
+        if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 40) {
+          go(dx < 0 ? 1 : -1);
+        }
+      }, { passive: true });
+    }
+
+    // If images are already cached (loaded synchronously)
+    setTimeout(() => {
+      const remaining = track.querySelectorAll('img');
+      const allDone = Array.from(remaining).every(i => i.complete);
+      if (allDone && remaining.length > 0 && !carousel.querySelector('.carousel-btn')) {
+        buildControls(carousel, track, remaining.length);
+      } else if (remaining.length === 0 && !carousel.querySelector('.card-image-placeholder')) {
+        carousel.innerHTML = '<div class="card-image-placeholder">📷</div>';
+      }
+    }, 100);
+  });
+</script>
+
+</body>
+</html>
