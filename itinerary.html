@@ -1,0 +1,2009 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prague & Turnov — Itinerary Planner</title>
+<style>
+  :root {
+    --bg: #f8f9fa;
+    --card-bg: #ffffff;
+    --card-border: #e5e7eb;
+    --accent: #1a1a1a;
+    --accent-dim: #374151;
+    --green: #16a34a;
+    --yellow: #ca8a04;
+    --red: #dc2626;
+    --orange: #ea580c;
+    --blue: #2563eb;
+    --text: #1f2937;
+    --text-dim: #6b7280;
+    --text-muted: #9ca3af;
+    --tag-bg: #f3f4f6;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--card-border);
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .header-left h1 {
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+  }
+
+  .header-left .subtitle {
+    font-size: 13px;
+    color: var(--text-dim);
+    margin-top: 2px;
+  }
+
+  .header-link {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--blue);
+    text-decoration: none;
+    padding: 6px 12px;
+    border-radius: 6px;
+    transition: background 0.2s;
+  }
+
+  .header-link:hover {
+    background: var(--tag-bg);
+  }
+
+  /* Day tiles strip */
+  .day-strip {
+    display: flex;
+    gap: 8px;
+    padding: 12px 16px;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(12px);
+    position: sticky;
+    top: 62px;
+    z-index: 99;
+    border-bottom: 1px solid var(--card-border);
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .day-strip::-webkit-scrollbar { display: none; }
+
+  .day-tile {
+    flex-shrink: 0;
+    width: 72px;
+    padding: 8px 6px;
+    border-radius: 10px;
+    border: 2px solid var(--card-border);
+    background: var(--card-bg);
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s;
+    user-select: none;
+    position: relative;
+  }
+
+  .day-tile:hover {
+    border-color: var(--text-muted);
+  }
+
+  .day-tile.active {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transform: translateY(-1px);
+  }
+
+  .day-tile.loc-prague { border-color: var(--blue); }
+  .day-tile.loc-prague.active { border-color: var(--blue); background: #eff6ff; }
+  .day-tile.loc-turnov { border-color: var(--green); }
+  .day-tile.loc-turnov.active { border-color: var(--green); background: #f0fdf4; }
+  .day-tile.loc-travel { border-color: var(--orange); }
+  .day-tile.loc-travel.active { border-color: var(--orange); background: #fff7ed; }
+
+  .day-tile .day-abbr {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    letter-spacing: 0.5px;
+  }
+
+  .day-tile .day-date {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    margin-top: 2px;
+  }
+
+  .day-tile .day-loc {
+    font-size: 10px;
+    font-weight: 600;
+    margin-top: 3px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+
+  .day-tile.loc-prague .day-loc { color: var(--blue); }
+  .day-tile.loc-turnov .day-loc { color: var(--green); }
+  .day-tile.loc-travel .day-loc { color: var(--orange); }
+
+  .day-tile .plan-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--green);
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    display: none;
+  }
+
+  .day-tile.has-plan .plan-dot { display: block; }
+
+  /* Main content area */
+  .main-area {
+    display: flex;
+    gap: 20px;
+    padding: 20px 16px;
+    max-width: 1200px;
+    margin: 0 auto;
+    min-height: calc(100vh - 140px);
+  }
+
+  .plans-col {
+    width: 40%;
+    flex-shrink: 0;
+  }
+
+  .detail-col {
+    width: 60%;
+    flex-grow: 1;
+  }
+
+  .col-header {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .clear-btn {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--red);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 2px 8px;
+    border-radius: 4px;
+    transition: background 0.2s;
+    display: none;
+  }
+
+  .clear-btn.visible { display: inline-block; }
+  .clear-btn:hover { background: #fef2f2; }
+
+  .plan-card {
+    background: var(--card-bg);
+    border: 2px solid var(--card-border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+  }
+
+  .plan-card:hover {
+    border-color: var(--text-muted);
+  }
+
+  .plan-card.selected {
+    border-color: var(--blue);
+    background: #f8faff;
+  }
+
+  .plan-card .plan-name {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .plan-card .plan-name .checkmark {
+    display: none;
+    color: var(--blue);
+    font-size: 16px;
+  }
+
+  .plan-card.selected .plan-name .checkmark { display: inline; }
+
+  .plan-card .plan-summary {
+    font-size: 13px;
+    color: var(--text-dim);
+    margin-top: 4px;
+    line-height: 1.4;
+  }
+
+  .plan-card .plan-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: 8px;
+  }
+
+  .tag {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 10px;
+    background: var(--tag-bg);
+    color: var(--text-dim);
+  }
+
+  .tag.rec { background: #fef3c7; color: #92400e; }
+  .tag.warn { background: #fef2f2; color: var(--red); }
+
+  /* Detail panel */
+  .detail-panel {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    padding: 24px;
+    min-height: 300px;
+  }
+
+  .detail-empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 300px;
+    color: var(--text-muted);
+    font-size: 15px;
+  }
+
+  .detail-title {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+
+  .detail-day-label {
+    font-size: 13px;
+    color: var(--text-dim);
+    margin-bottom: 20px;
+  }
+
+  /* Timeline */
+  .timeline {
+    position: relative;
+    padding-left: 28px;
+    margin-bottom: 24px;
+  }
+
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 8px;
+    top: 6px;
+    bottom: 6px;
+    width: 2px;
+    background: var(--card-border);
+    border-radius: 1px;
+  }
+
+  .timeline-step {
+    position: relative;
+    padding-bottom: 18px;
+  }
+
+  .timeline-step:last-child { padding-bottom: 0; }
+
+  .timeline-step::before {
+    content: '';
+    position: absolute;
+    left: -22px;
+    top: 6px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--blue);
+    border: 2px solid white;
+    box-shadow: 0 0 0 2px var(--blue);
+    z-index: 1;
+  }
+
+  .timeline-step.green::before { background: var(--green); box-shadow: 0 0 0 2px var(--green); }
+  .timeline-step.orange::before { background: var(--orange); box-shadow: 0 0 0 2px var(--orange); }
+
+  .timeline-time {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--blue);
+    text-transform: uppercase;
+  }
+
+  .timeline-step.green .timeline-time { color: var(--green); }
+  .timeline-step.orange .timeline-time { color: var(--orange); }
+
+  .timeline-desc {
+    font-size: 14px;
+    color: var(--text);
+    margin-top: 2px;
+    line-height: 1.5;
+  }
+
+  /* Info sections */
+  .info-section {
+    margin-bottom: 20px;
+  }
+
+  .info-section-title {
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-dim);
+    margin-bottom: 8px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--card-border);
+  }
+
+  .info-card {
+    background: var(--tag-bg);
+    border-radius: 8px;
+    padding: 12px 14px;
+    margin-bottom: 8px;
+  }
+
+  .info-card .info-card-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .info-card .info-card-desc {
+    font-size: 13px;
+    color: var(--text-dim);
+    margin-top: 2px;
+  }
+
+  .info-card .info-card-price {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--green);
+    margin-top: 2px;
+  }
+
+  .practical-list {
+    list-style: none;
+    padding: 0;
+  }
+
+  .practical-list li {
+    font-size: 13px;
+    color: var(--text-dim);
+    padding: 4px 0;
+    padding-left: 16px;
+    position: relative;
+  }
+
+  .practical-list li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 11px;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--text-muted);
+  }
+
+  .detail-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--card-border);
+  }
+
+  .detail-tags .tag {
+    font-size: 12px;
+    padding: 4px 10px;
+  }
+
+  .map-container {
+    margin-bottom: 20px;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid var(--card-border);
+  }
+
+  .map-container iframe {
+    display: block;
+  }
+
+  /* Mobile */
+  @media (max-width: 768px) {
+    .main-area {
+      flex-direction: column;
+      gap: 16px;
+      padding: 12px;
+    }
+
+    .plans-col, .detail-col {
+      width: 100%;
+    }
+
+    .detail-panel {
+      padding: 16px;
+    }
+
+    .header {
+      padding: 10px 12px;
+    }
+
+    .day-strip {
+      padding: 10px 12px;
+      gap: 6px;
+    }
+
+    .day-tile {
+      width: 64px;
+      padding: 6px 4px;
+    }
+
+    .mobile-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      margin-bottom: 8px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-dim);
+      transition: all 0.2s;
+    }
+
+    .mobile-toggle:hover { background: var(--tag-bg); }
+
+    .detail-col.collapsed .detail-panel { display: none; }
+    .detail-col.collapsed .mobile-toggle .toggle-arrow { transform: rotate(0deg); }
+  }
+
+  @media (min-width: 769px) {
+    .mobile-toggle { display: none; }
+  }
+
+  .toggle-arrow {
+    margin-left: 6px;
+    transition: transform 0.2s;
+    transform: rotate(180deg);
+    display: inline-block;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <h1>Prague & Turnov Trip</h1>
+    <div class="subtitle">Itinerary Planner</div>
+  </div>
+  <a href="attractions.html" class="header-link">&larr; Attractions</a>
+</div>
+
+<div class="day-strip" id="dayStrip"></div>
+
+<div class="main-area">
+  <div class="plans-col" id="plansCol">
+    <div class="col-header">
+      <span>Choose a Plan</span>
+      <button class="clear-btn" id="clearBtn" onclick="clearSelection()">Clear</button>
+    </div>
+    <div id="plansList"></div>
+  </div>
+  <div class="detail-col" id="detailCol">
+    <div class="mobile-toggle" onclick="toggleDetail()">
+      Your Day <span class="toggle-arrow">&#9660;</span>
+    </div>
+    <div class="detail-panel" id="detailPanel">
+      <div class="detail-empty" id="detailEmpty">Pick a plan to see details</div>
+      <div id="detailContent" style="display:none;"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const DAYS = [
+  {
+    id: 'apr2',
+    date: 'Apr 2',
+    dow: 'Thu',
+    label: 'Arrival Day',
+    location: 'Prague',
+    plans: [
+      {
+        name: 'Jet Lag Recovery',
+        emoji: '',
+        summary: 'Check into Kaiserstein Palace, gentle walk to Kampa Island, Lennon Wall, early dinner and bed.',
+        recommended: false,
+        warning: '',
+        tags: ['Kid-Friendly', 'Easy Day'],
+        timeline: [
+          { time: '3:00 PM', desc: 'Check into Kaiserstein Palace apartment. Settle in, unpack essentials.', color: 'blue' },
+          { time: '4:00 PM', desc: 'Gentle walk to Kampa Island (5 min). Let the kids run around on the grass.', color: 'green' },
+          { time: '5:00 PM', desc: 'Walk to Lennon Wall (2 min from Kampa). Quick photo stop.', color: 'blue' },
+          { time: '6:00 PM', desc: 'Dinner at a nearby restaurant in Mala Strana. Keep it simple.', color: 'orange' },
+          { time: '7:30 PM', desc: 'Back to apartment. Early bed for everyone -- fight the jet lag.', color: 'blue' }
+        ],
+        mapQuery: '50.0865,14.4038',
+        mapZoom: 15,
+        food: [
+          { name: 'Mala Strana restaurants', desc: 'Plenty of options within a 5 minute walk of the apartment', price: '200-400 CZK / main' }
+        ],
+        practical: [
+          'Apartment check-in at 3 PM',
+          'Kampa Island is a 5 min walk -- great open space for kids',
+          'Lennon Wall is 2 min from Kampa',
+          'Keep the evening simple -- everyone will be tired from travel'
+        ]
+      }
+    ]
+  },
+  {
+    id: 'apr3',
+    date: 'Apr 3',
+    dow: 'Fri',
+    label: 'First Full Day',
+    location: 'Prague',
+    plans: [
+      {
+        name: 'Castle & Petrin',
+        emoji: '',
+        summary: 'Prague Castle in the morning, Petrin Hill in the afternoon. Full day of top sights.',
+        recommended: false,
+        warning: '',
+        tags: ['Must-See', 'Full Day', 'Kid-Friendly'],
+        timeline: [
+          { time: '9:00 AM', desc: 'Walk up Nerudova street to Prague Castle (15 min uphill walk).', color: 'blue' },
+          { time: '9:30 AM', desc: 'Explore Prague Castle complex: St. Vitus Cathedral, Golden Lane. Allow 2 hours.', color: 'blue' },
+          { time: '11:30 AM', desc: 'Lunch near the castle area. Several restaurants on Loretanska.', color: 'orange' },
+          { time: '1:00 PM', desc: 'Walk to Petrin Hill (15 min). Take the funicular up.', color: 'green' },
+          { time: '1:30 PM', desc: 'Petrin Tower climb (299 steps) -- great views. Then Mirror Maze (kids love it).', color: 'green' },
+          { time: '3:30 PM', desc: 'Walk down through the gardens back toward the apartment.', color: 'green' },
+          { time: '5:00 PM', desc: 'Rest at apartment. Dinner out later or pick up food.', color: 'blue' }
+        ],
+        mapQuery: '50.0865,14.4038',
+        mapZoom: 14,
+        food: [
+          { name: 'Castle area restaurants', desc: 'Several options on Loretanska street near the castle', price: '200-400 CZK / main' },
+          { name: 'Petrin area', desc: 'Cafe at the top of Petrin Hill', price: '100-200 CZK' }
+        ],
+        practical: [
+          'Prague Castle opens at 9 AM -- get there early to beat crowds',
+          'Golden Lane is included in castle ticket (250 CZK adult)',
+          'Petrin funicular accepts transit passes',
+          'Petrin Tower: 150 CZK adult, 80 CZK child',
+          'Mirror Maze: 150 CZK adult, 80 CZK child',
+          'Lots of uphill walking -- bring comfortable shoes and a stroller for Thomas'
+        ]
+      },
+      {
+        name: 'Old Town Explorer',
+        emoji: '',
+        summary: 'Cross Charles Bridge to Old Town. Astronomical Clock, Old Town Square, playground.',
+        recommended: false,
+        warning: '',
+        tags: ['Must-See', 'Kid-Friendly'],
+        timeline: [
+          { time: '9:30 AM', desc: 'Walk across Charles Bridge to Old Town (15 min). Enjoy the statues and views.', color: 'blue' },
+          { time: '10:00 AM', desc: 'Astronomical Clock at Old Town Square. Watch the hourly show (on the hour).', color: 'blue' },
+          { time: '10:30 AM', desc: 'Explore Old Town Square. Tyn Church exterior. Wander the side streets.', color: 'blue' },
+          { time: '12:00 PM', desc: 'Lunch in Old Town. Plenty of options.', color: 'orange' },
+          { time: '1:30 PM', desc: 'Walk to Strelecky ostrov playground (island in the river, 10 min walk).', color: 'green' },
+          { time: '3:30 PM', desc: 'Kids play at the playground. Adults relax with a view of the river.', color: 'green' },
+          { time: '5:00 PM', desc: 'Stroll back via Charles Bridge. Golden hour light for photos.', color: 'blue' }
+        ],
+        mapQuery: '50.0875,14.4213',
+        mapZoom: 15,
+        food: [
+          { name: 'Old Town restaurants', desc: 'Wide variety around Old Town Square -- avoid the tourist traps right on the square', price: '200-500 CZK / main' },
+          { name: 'Side streets', desc: 'Better value on streets like Dlouha or Husova', price: '150-300 CZK / main' }
+        ],
+        practical: [
+          'Charles Bridge is less crowded in the morning',
+          'Tip: Climb the Old Town Hall Tower for amazing views (~150-200 CZK, 138 steps, open 10-19 in April)',
+          'Astronomical Clock show happens on the hour',
+          'Strelecky ostrov has a great playground right on the river',
+          'Old Town Square can be very crowded -- keep kids close',
+          'Watch out for overpriced restaurants directly on the square'
+        ]
+      },
+      {
+        name: 'Easy Start',
+        emoji: '',
+        summary: 'Low-key day to ease in. Kampa Island, Charles Bridge, Mala Strana, Petrin Hill.',
+        recommended: false,
+        warning: '',
+        tags: ['Easy Day', 'Kid-Friendly'],
+        timeline: [
+          { time: '10:00 AM', desc: 'Walk to Kampa Island + Lennon Wall. Let kids run around.', color: 'green' },
+          { time: '11:00 AM', desc: 'Cross Charles Bridge (less crowded on weekday mornings).', color: 'blue' },
+          { time: '11:30 AM', desc: 'Quick look at Old Town side, then head back.', color: 'blue' },
+          { time: '12:30 PM', desc: 'Lunch in Mala Strana. Lots of charming restaurants.', color: 'orange' },
+          { time: '2:00 PM', desc: 'Petrin Hill -- take the funicular up, walk around the gardens.', color: 'green' },
+          { time: '4:00 PM', desc: 'Back to apartment. Rest time. Low-key evening.', color: 'blue' }
+        ],
+        mapQuery: '50.0865,14.4038',
+        mapZoom: 15,
+        food: [
+          { name: 'Mala Strana restaurants', desc: 'Charming neighborhood with great food options', price: '200-350 CZK / main' }
+        ],
+        practical: [
+          'Perfect if you are still adjusting to the time change',
+          'Charles Bridge is best early on weekday mornings',
+          'Consider climbing the Old Town Hall Tower (~150-200 CZK, 138 steps, open 10-19)',
+          'Petrin funicular accepts transit passes',
+          'No rush -- this day is about settling in'
+        ]
+      }
+    ]
+  },
+  {
+    id: 'apr4',
+    date: 'Apr 4',
+    dow: 'Sat',
+    label: 'Easter Saturday',
+    location: 'Prague',
+    plans: [
+      {
+        name: 'Markets + Concert',
+        emoji: '',
+        summary: 'Easter Markets at Old Town Square with kids workshops, evening classical concert.',
+        recommended: true,
+        warning: '',
+        tags: ['Easter Special', 'Kid-Friendly', 'Live Music'],
+        timeline: [
+          { time: '10:00 AM', desc: 'Head to Easter Markets at Old Town Square (open all day).', color: 'blue' },
+          { time: '11:00 AM', desc: 'Kids workshops at the markets (crafts, egg painting, 11 AM - 3 PM).', color: 'green' },
+          { time: '12:30 PM', desc: 'Lunch at market stalls: sausages, trdlo (chimney cake), beer for adults.', color: 'orange' },
+          { time: '2:00 PM', desc: 'Back to apartment for rest / nap time.', color: 'blue' },
+          { time: '5:00 PM', desc: 'Early dinner near apartment.', color: 'orange' },
+          { time: '7:00 PM', desc: 'Classical concert at Klementinum Mirror Chapel or St. Nicholas Church. Check listings.', color: 'blue' }
+        ],
+        mapQuery: '50.0875,14.4213',
+        mapZoom: 15,
+        food: [
+          { name: 'Easter Market stalls', desc: 'Traditional Czech street food: klobasa (sausage), trdlo, langos', price: '80-150 CZK per item' },
+          { name: 'Market beer stands', desc: 'Draft Czech beer at the markets', price: '60-80 CZK / pint' }
+        ],
+        practical: [
+          'Easter Markets open from about 10 AM to 10 PM',
+          'Kids workshops typically 11 AM - 3 PM (free or small fee)',
+          'Klementinum concerts: book online in advance (~500 CZK/person)',
+          'St. Nicholas concerts are also excellent and atmospheric',
+          'Markets will be crowded on Saturday -- go early'
+        ]
+      },
+      {
+        name: 'Castle + Markets',
+        emoji: '',
+        summary: 'Early morning Prague Castle to beat Saturday crowds, then Easter Markets in the afternoon.',
+        recommended: false,
+        warning: '',
+        tags: ['Must-See', 'Easter Special'],
+        timeline: [
+          { time: '8:30 AM', desc: 'Head to Prague Castle early to beat the Saturday crowds.', color: 'blue' },
+          { time: '9:00 AM', desc: 'Explore Prague Castle: St. Vitus, Golden Lane (2 hours).', color: 'blue' },
+          { time: '11:00 AM', desc: 'Lunch near the castle.', color: 'orange' },
+          { time: '12:30 PM', desc: 'Walk or tram down to Old Town.', color: 'blue' },
+          { time: '1:00 PM', desc: 'Easter Markets at Old Town Square. Browse stalls, workshops.', color: 'green' },
+          { time: '4:00 PM', desc: 'Head back. Free evening.', color: 'blue' }
+        ],
+        mapQuery: '50.0755,14.4378',
+        mapZoom: 13,
+        food: [
+          { name: 'Castle area restaurants', desc: 'Lunch options on Loretanska street', price: '200-400 CZK / main' },
+          { name: 'Easter Market stalls', desc: 'Klobasa, trdlo, langos, beer', price: '80-150 CZK per item' }
+        ],
+        practical: [
+          'Saturday is busy at the castle -- going at 9 AM opening helps',
+          'Castle ticket: 250 CZK adult',
+          'Tram 22 runs between castle and Old Town',
+          'Easter Markets run until 10 PM'
+        ]
+      },
+      {
+        name: 'Vysehrad + Markets',
+        emoji: '',
+        summary: 'Morning at Vysehrad fortress with great playground, afternoon Easter Markets, optional evening concert.',
+        recommended: false,
+        warning: '',
+        tags: ['Kid-Friendly', 'Playground', 'Easter Special'],
+        timeline: [
+          { time: '9:30 AM', desc: 'Tram to Vysehrad. Walk up to the fortress (10 min uphill).', color: 'blue' },
+          { time: '10:00 AM', desc: 'Explore Vysehrad: fortress walls, amazing views, cemetery with Dvorak\'s grave.', color: 'blue' },
+          { time: '11:00 AM', desc: 'Kids playground at Vysehrad -- excellent and spacious.', color: 'green' },
+          { time: '12:00 PM', desc: 'Lunch near Vysehrad.', color: 'orange' },
+          { time: '1:30 PM', desc: 'Tram/metro to Old Town.', color: 'blue' },
+          { time: '2:00 PM', desc: 'Easter Markets at Old Town Square.', color: 'green' },
+          { time: '4:30 PM', desc: 'Head back. Optional: evening concert.', color: 'blue' }
+        ],
+        mapQuery: '50.0755,14.4378',
+        mapZoom: 13,
+        food: [
+          { name: 'Near Vysehrad', desc: 'Several restaurants along the tram line', price: '180-300 CZK / main' },
+          { name: 'Easter Market stalls', desc: 'Street food at Old Town Square', price: '80-150 CZK per item' }
+        ],
+        practical: [
+          'Vysehrad is free to enter (casemates have a small fee)',
+          'The playground at Vysehrad is one of the best in Prague',
+          'Tram 2 or 17 to Vysehrad, or metro C to Vysehrad station',
+          'Concert option: Klementinum or St. Nicholas (~500 CZK/person)'
+        ]
+      }
+    ]
+  },
+  {
+    id: 'apr5',
+    date: 'Apr 5',
+    dow: 'Sun',
+    label: 'Easter Sunday',
+    location: 'Prague',
+    plans: [
+      {
+        name: 'Easter Markets Day',
+        emoji: '',
+        summary: 'Full day at Easter Markets. Old Town Square in the morning, Namesti Miru market in the afternoon.',
+        recommended: false,
+        warning: '',
+        tags: ['Easter Special', 'Kid-Friendly'],
+        timeline: [
+          { time: '10:00 AM', desc: 'Easter Markets at Old Town Square. Kids workshops and crafts.', color: 'green' },
+          { time: '11:00 AM', desc: 'Explore Old Town. Wander the streets around the square.', color: 'blue' },
+          { time: '12:30 PM', desc: 'Lunch in Old Town.', color: 'orange' },
+          { time: '2:00 PM', desc: 'Walk or tram to Namesti Miru market (smaller, more local feel).', color: 'blue' },
+          { time: '3:30 PM', desc: 'Browse the local market. Less touristy, more authentic.', color: 'green' },
+          { time: '5:00 PM', desc: 'Head to Petrin if energy remains. Otherwise head back.', color: 'green' }
+        ],
+        mapQuery: '50.0875,14.4213',
+        mapZoom: 14,
+        food: [
+          { name: 'Old Town Square market stalls', desc: 'Klobasa, trdlo, langos, goulash in bread bowl', price: '80-150 CZK per item' },
+          { name: 'Namesti Miru market', desc: 'More local food vendors, often better value', price: '60-120 CZK per item' }
+        ],
+        practical: [
+          'Easter Sunday is the busiest day at the markets',
+          'Go to Old Town Square early (before 11) for smaller crowds',
+          'Namesti Miru market is a nice contrast -- more locals',
+          'Metro A to Namesti Miru',
+          'Markets run until about 10 PM'
+        ]
+      },
+      {
+        name: 'Petrin + Kampa',
+        emoji: '',
+        summary: 'Petrin Hill in the morning, Kampa Island in the afternoon, Easter Markets in the evening.',
+        recommended: false,
+        warning: '',
+        tags: ['Kid-Friendly', 'Outdoors'],
+        timeline: [
+          { time: '9:30 AM', desc: 'Take the funicular up Petrin Hill.', color: 'green' },
+          { time: '10:00 AM', desc: 'Petrin Tower (views!) and Mirror Maze (kids love it).', color: 'green' },
+          { time: '11:30 AM', desc: 'Walk down through the gardens.', color: 'green' },
+          { time: '12:00 PM', desc: 'Lunch in Mala Strana.', color: 'orange' },
+          { time: '1:30 PM', desc: 'Kampa Island. Kids play on the grass. Relax by the river.', color: 'green' },
+          { time: '3:30 PM', desc: 'Rest at apartment.', color: 'blue' },
+          { time: '6:00 PM', desc: 'Evening walk to Easter Markets (they run till 10 PM). Dinner there.', color: 'blue' }
+        ],
+        mapQuery: '50.0865,14.4038',
+        mapZoom: 15,
+        food: [
+          { name: 'Mala Strana restaurants', desc: 'Lunch in the charming Lesser Town', price: '200-350 CZK / main' },
+          { name: 'Easter Market stalls', desc: 'Evening dinner at the markets', price: '80-150 CZK per item' }
+        ],
+        practical: [
+          'Funicular runs from Ujezd station (accepts transit passes)',
+          'Petrin Tower: 150 CZK adult, 80 CZK child',
+          'Mirror Maze: 150 CZK adult, 80 CZK child',
+          'Kampa is great for letting kids burn off energy',
+          'Evening markets have a lovely atmosphere with lights'
+        ]
+      },
+      {
+        name: 'Technical Museum',
+        emoji: '',
+        summary: 'National Technical Museum (trains, planes -- Thomas will love it), then Letna Park and Beer Garden.',
+        recommended: false,
+        warning: '',
+        tags: ['Kid-Friendly', 'Rainy Day Backup', 'Beer Available'],
+        timeline: [
+          { time: '9:30 AM', desc: 'Tram to National Technical Museum (tram 1, 8, 12 to Letenska).', color: 'blue' },
+          { time: '10:00 AM', desc: 'Explore the museum: trains, planes, cars, astronomy. Thomas will love the transport hall.', color: 'blue' },
+          { time: '12:00 PM', desc: 'Walk through Letna Park toward the beer garden.', color: 'green' },
+          { time: '12:30 PM', desc: 'Lunch at Letna Beer Garden -- amazing views over the river and bridges.', color: 'orange' },
+          { time: '2:00 PM', desc: 'Free afternoon. Easter Markets if you want, or rest.', color: 'blue' }
+        ],
+        mapQuery: '50.0975,14.4250',
+        mapZoom: 15,
+        food: [
+          { name: 'Letna Beer Garden', desc: 'Iconic beer garden with panoramic views of Prague bridges. Burgers, sausages, beer.', price: '100-200 CZK / meal, 50-70 CZK / beer' }
+        ],
+        practical: [
+          'National Technical Museum: 250 CZK adult, 130 CZK child, free under 6',
+          'Open Tue-Sun 9-17:30 (check Easter Sunday hours)',
+          'The transport hall has real trains, planes, and vintage cars',
+          'Letna Beer Garden is a 10 min walk through the park from the museum',
+          'Great rainy day option -- museum is entirely indoor'
+        ]
+      }
+    ]
+  },
+  {
+    id: 'apr6',
+    date: 'Apr 6',
+    dow: 'Mon',
+    label: '',
+    location: 'Prague',
+    plans: [
+      {
+        name: 'Vysehrad Day',
+        emoji: '',
+        summary: 'Vysehrad fortress, casemates, playground, and cemetery. Relaxed afternoon.',
+        recommended: false,
+        warning: '',
+        tags: ['Kid-Friendly', 'Playground', 'History'],
+        timeline: [
+          { time: '9:30 AM', desc: 'Tram to Vysehrad (tram 2/17 or metro C).', color: 'blue' },
+          { time: '10:00 AM', desc: 'Explore Vysehrad fortress: walls, views of the city, Romanesque rotunda.', color: 'blue' },
+          { time: '11:00 AM', desc: 'Visit the casemates (underground passages) and cemetery (Dvorak, Smetana).', color: 'blue' },
+          { time: '11:45 AM', desc: 'Kids playground at Vysehrad -- excellent, lots of space.', color: 'green' },
+          { time: '12:30 PM', desc: 'Lunch nearby.', color: 'orange' },
+          { time: '2:00 PM', desc: 'Head to Strelecky ostrov for more playground time, or free afternoon.', color: 'green' }
+        ],
+        mapQuery: '50.0646,14.4197',
+        mapZoom: 15,
+        food: [
+          { name: 'Near Vysehrad', desc: 'Restaurants along the embankment and near the tram stop', price: '180-300 CZK / main' }
+        ],
+        practical: [
+          'Vysehrad is free to enter. Casemates: 90 CZK adult',
+          'The playground is one of the best in Prague for young kids',
+          'Less touristy than the castle area -- feels more local',
+          'Great views from the fortress walls',
+          'Strelecky ostrov playground is on an island near the National Theatre'
+        ]
+      },
+      {
+        name: 'Museum + Letna',
+        emoji: '',
+        summary: 'National Technical Museum in the morning, Letna Park and Beer Garden in the afternoon.',
+        recommended: false,
+        warning: '',
+        tags: ['Kid-Friendly', 'Beer Available', 'Rainy Day Backup'],
+        timeline: [
+          { time: '9:30 AM', desc: 'Tram to National Technical Museum.', color: 'blue' },
+          { time: '10:00 AM', desc: 'Explore the museum: trains, planes, cars (Thomas will love it).', color: 'blue' },
+          { time: '12:00 PM', desc: 'Walk through Letna Park.', color: 'green' },
+          { time: '12:30 PM', desc: 'Lunch at Letna Beer Garden. Views over the bridges.', color: 'orange' },
+          { time: '2:00 PM', desc: 'Walk around Letna Park. Playground. Views from the metronome.', color: 'green' },
+          { time: '3:30 PM', desc: 'Head back to apartment.', color: 'blue' }
+        ],
+        mapQuery: '50.0975,14.4250',
+        mapZoom: 15,
+        food: [
+          { name: 'Letna Beer Garden', desc: 'Panoramic views, burgers, sausages, great beer', price: '100-200 CZK / meal, 50-70 CZK / beer' }
+        ],
+        practical: [
+          'Technical Museum: 250 CZK adult, 130 CZK child, free under 6',
+          'Open Tue-Sun 9-17:30 -- check Monday hours!',
+          'Letna has a great playground near the beer garden',
+          'The metronome viewpoint is where Stalin\'s statue used to be'
+        ]
+      },
+      {
+        name: 'Chill Day',
+        emoji: '',
+        summary: 'Kampa Island morning, Mala Strana lunch, Old Town Hall Tower climb, exploring Lesser Town.',
+        recommended: false,
+        warning: '',
+        tags: ['Easy Day', 'Kid-Friendly'],
+        timeline: [
+          { time: '10:00 AM', desc: 'Kampa Island. Let the kids play. Walk along the Certovka canal.', color: 'green' },
+          { time: '11:30 AM', desc: 'Explore Mala Strana streets. Window shopping, charming squares.', color: 'blue' },
+          { time: '12:30 PM', desc: 'Lunch in Mala Strana.', color: 'orange' },
+          { time: '2:00 PM', desc: 'Old Town Hall Tower climb — 138 steps, Old Town Square spread out below you.', color: 'blue' },
+          { time: '3:00 PM', desc: 'Wander Lesser Town. Churches, gardens, quiet corners.', color: 'blue' },
+          { time: '4:30 PM', desc: 'Back to apartment. Relaxed evening.', color: 'blue' }
+        ],
+        mapQuery: '50.0865,14.4038',
+        mapZoom: 15,
+        food: [
+          { name: 'Mala Strana restaurants', desc: 'Charming neighborhood restaurants on side streets', price: '200-350 CZK / main' }
+        ],
+        practical: [
+          'Kampa Island is right next to the apartment',
+          'Old Town Hall Tower: ~150-200 CZK adult — buy at door or museumprahy.cz, 138 steps, April hours 10-19',
+          'Mala Strana is lovely for just wandering',
+          'The Certovka canal near Kampa is called "Prague\'s Venice"'
+        ]
+      }
+    ]
+  },
+  {
+    id: 'apr7',
+    date: 'Apr 7',
+    dow: 'Tue',
+    label: '📸 Photo Session | 🍽️ Taro Dinner',
+    location: 'Prague',
+    plans: [
+      {
+        name: 'Old Town Deep Dive',
+        emoji: '',
+        summary: '📸 Morning photo session (TBD) → Jewish Quarter, Old Town Square, Astronomical Clock → 🍽️ Abe & Allie dinner at Taro 17:45.',
+        recommended: false,
+        warning: '',
+        tags: ['Must-See', 'History', 'Kid-Friendly'],
+        timeline: [
+          { time: 'Morning', desc: '📸 Family Photography Session — time & exact location TBD. Book early!', color: 'green' },
+          { time: '~10:30 AM', desc: 'Walk to Old Town. Start at the Jewish Quarter (Josefov).', color: 'blue' },
+          { time: '11:00 AM', desc: 'Explore Jewish Quarter: Old Jewish Cemetery, synagogues (if interested). Or just walk through the neighborhood.', color: 'blue' },
+          { time: '12:00 PM', desc: 'Old Town Square. Astronomical Clock on the hour. Tyn Church.', color: 'blue' },
+          { time: '1:00 PM', desc: 'Lunch in Old Town -- try side streets for better value.', color: 'orange' },
+          { time: '2:30 PM', desc: 'Wander the winding streets. Hidden courtyards, passages.', color: 'blue' },
+          { time: '3:30 PM', desc: 'Walk to Strelecky ostrov playground. Kids play, adults relax.', color: 'green' },
+          { time: '5:00 PM', desc: 'Head back to apartment. Cliff & Denise take the kids for the evening.', color: 'blue' },
+          { time: '5:45 PM', desc: '🍽️ Abe & Allie dinner at Taro — Ref: 9YN-GRQ. Indoor, 2 adults. 17:45 reservation.', color: 'orange' }
+        ],
+        mapQuery: '50.0875,14.4213',
+        mapZoom: 15,
+        food: [
+          { name: '🍽️ Taro (confirmed — Abe & Allie)', desc: 'Dinner reservation 17:45, indoor, 2 adults. Ref: 9YN-GRQ. Cliff & Denise watch the kids.', price: 'Reservation confirmed' },
+          { name: 'Dlouha street area', desc: 'Good restaurants on this street north of Old Town Square', price: '180-350 CZK / main' },
+          { name: 'Husova street', desc: 'Less touristy options south of the square', price: '150-300 CZK / main' }
+        ],
+        practical: [
+          '📸 Photography session time & location TBD — confirm with photographer',
+          '🍽️ Taro dinner: 17:45, 2 adults (Abe & Allie), indoor. Ref: 9YN-GRQ',
+          'Cancellation policy: cancel via email link at least 6 hours before (by 11:45 AM)',
+          'Jewish Quarter combo ticket: 500 CZK adult (worth it if you are interested)',
+          'Astronomical Clock show is on the hour 9 AM - 11 PM',
+          'Strelecky ostrov playground is great for burning off energy'
+        ]
+      },
+      {
+        name: 'Petrin + Gardens',
+        emoji: '',
+        summary: '📸 Morning photo session (TBD) → Petrin Hill funicular, tower, mirror maze → 🍽️ Abe & Allie dinner at Taro 17:45.',
+        recommended: false,
+        warning: '',
+        tags: ['Outdoors', 'Kid-Friendly', 'Views'],
+        timeline: [
+          { time: 'Morning', desc: '📸 Family Photography Session — time & exact location TBD. Book early!', color: 'green' },
+          { time: '~10:30 AM', desc: 'Take the funicular up Petrin Hill from Ujezd station.', color: 'green' },
+          { time: '11:00 AM', desc: 'Petrin Tower climb (299 steps). Amazing 360-degree views.', color: 'green' },
+          { time: '11:45 AM', desc: 'Mirror Maze -- kids will love this.', color: 'green' },
+          { time: '12:30 PM', desc: 'Walk through Petrin gardens toward Strahov. Lunch at Strahov Monastery Brewery.', color: 'orange' },
+          { time: '2:00 PM', desc: 'Stroll through the Royal Garden. Beautiful in spring.', color: 'green' },
+          { time: '3:30 PM', desc: 'Walk back down to Mala Strana and apartment.', color: 'blue' },
+          { time: '5:00 PM', desc: 'Cliff & Denise take the kids for the evening.', color: 'blue' },
+          { time: '5:45 PM', desc: '🍽️ Abe & Allie dinner at Taro — Ref: 9YN-GRQ. Indoor, 2 adults. 17:45 reservation.', color: 'orange' }
+        ],
+        mapQuery: '50.0835,14.3950',
+        mapZoom: 14,
+        food: [
+          { name: '🍽️ Taro (confirmed — Abe & Allie)', desc: 'Dinner reservation 17:45, indoor, 2 adults. Ref: 9YN-GRQ. Cliff & Denise watch the kids.', price: 'Reservation confirmed' },
+          { name: 'Strahov Monastery Brewery', desc: 'Historic brewery with views and good Czech food', price: '200-350 CZK / main' },
+          { name: 'Garden cafes', desc: 'Cafes in the Royal Garden area', price: '100-200 CZK' }
+        ],
+        practical: [
+          '📸 Photography session time & location TBD — confirm with photographer',
+          '🍽️ Taro dinner: 17:45, 2 adults (Abe & Allie), indoor. Ref: 9YN-GRQ',
+          'Cancellation policy: cancel via email link at least 6 hours before (by 11:45 AM)',
+          'Funicular accepts transit passes',
+          'Tower: 150 CZK adult, 80 CZK child',
+          'Mirror Maze: 150 CZK adult, 80 CZK child',
+          'Royal Garden is beautiful in early April -- spring flowers'
+        ]
+      },
+      {
+        name: 'Parents\' Split',
+        emoji: '',
+        summary: '📸 Morning photo session (TBD) → Adults rotate: playground vs free explore → 🍽️ Abe & Allie dinner at Taro 17:45.',
+        recommended: false,
+        warning: '',
+        tags: ['Flexible', 'Kid-Friendly', 'Adult Time'],
+        timeline: [
+          { time: 'Morning', desc: '📸 Family Photography Session — time & exact location TBD. Book early!', color: 'green' },
+          { time: '~10:30 AM', desc: 'Team A takes kids to Kampa Island / Strelecky ostrov playground.', color: 'green' },
+          { time: '~10:30 AM', desc: 'Team B explores freely: churches, cafes, shopping, photography.', color: 'blue' },
+          { time: '12:30 PM', desc: 'Meet up for lunch together.', color: 'orange' },
+          { time: '2:00 PM', desc: 'Swap! Team B takes kids, Team A gets free time.', color: 'green' },
+          { time: '4:30 PM', desc: 'Meet back at apartment. Cliff & Denise take the kids for the evening.', color: 'blue' },
+          { time: '5:45 PM', desc: '🍽️ Abe & Allie dinner at Taro — Ref: 9YN-GRQ. Indoor, 2 adults. 17:45 reservation.', color: 'orange' }
+        ],
+        mapQuery: '50.0865,14.4038',
+        mapZoom: 15,
+        food: [
+          { name: '🍽️ Taro (confirmed — Abe & Allie)', desc: 'Dinner reservation 17:45, indoor, 2 adults. Ref: 9YN-GRQ. Cliff & Denise watch the kids.', price: 'Reservation confirmed' },
+          { name: 'Mala Strana lunch spot', desc: 'Meet in the middle for a family lunch', price: '200-350 CZK / main' }
+        ],
+        practical: [
+          '📸 Photography session time & location TBD — confirm with photographer',
+          '🍽️ Taro dinner: 17:45, 2 adults (Abe & Allie), indoor. Ref: 9YN-GRQ',
+          'Cancellation policy: cancel via email link at least 6 hours before (by 11:45 AM)',
+          'Kampa and Strelecky ostrov are the best kid playgrounds nearby',
+          'Free adults could visit: St. Nicholas Church, Wallenstein Garden, shops',
+          'Coordinate by phone -- set a lunch meeting point in advance'
+        ]
+      }
+    ]
+  },
+  {
+    id: 'apr8',
+    date: 'Apr 8',
+    dow: 'Wed',
+    label: '',
+    location: 'Prague',
+    plans: [
+      {
+        name: 'Last Prague Sights',
+        emoji: '',
+        summary: 'Catch anything you missed. Charles Bridge sunrise? Castle gardens? Souvenir shopping?',
+        recommended: false,
+        warning: '',
+        tags: ['Flexible'],
+        timeline: [
+          { time: '7:00 AM', desc: 'Optional: Charles Bridge at sunrise (nearly empty, magical light).', color: 'blue' },
+          { time: '9:00 AM', desc: 'Breakfast, regroup. What did you miss? Castle gardens? A museum?', color: 'orange' },
+          { time: '10:00 AM', desc: 'Fill in the gaps: visit anything you wished you had done earlier.', color: 'blue' },
+          { time: '12:00 PM', desc: 'Lunch at a favorite spot from the trip (go back to the best one).', color: 'orange' },
+          { time: '2:00 PM', desc: 'Souvenir shopping. Bohemian garnet jewelry, wooden toys, Becherovka.', color: 'blue' },
+          { time: '4:00 PM', desc: 'Back to apartment. Start thinking about packing for Turnov.', color: 'blue' }
+        ],
+        mapQuery: '50.0865,14.4038',
+        mapZoom: 14,
+        food: [
+          { name: 'Your favorite from the trip', desc: 'Go back to the best restaurant you found!', price: 'Varies' }
+        ],
+        practical: [
+          'Charles Bridge at sunrise is one of the most magical Prague experiences',
+          'Last chance to climb the Old Town Hall Tower if you haven\'t yet (~150-200 CZK, 138 steps)',
+          'Souvenir ideas: Bohemian garnet, wooden toys, Becherovka, Kofola',
+          'Start thinking about what you need for Turnov (cash, snacks for train)'
+        ]
+      },
+      {
+        name: 'Easy Day',
+        emoji: '',
+        summary: 'Rest up before Turnov. Kampa Island, local cafe, pack.',
+        recommended: false,
+        warning: '',
+        tags: ['Easy Day', 'Rest'],
+        timeline: [
+          { time: '10:00 AM', desc: 'Sleep in. Slow morning at the apartment.', color: 'blue' },
+          { time: '11:00 AM', desc: 'Walk to Kampa Island. Coffee at a local cafe.', color: 'green' },
+          { time: '12:00 PM', desc: 'Lunch in Mala Strana.', color: 'orange' },
+          { time: '2:00 PM', desc: 'Pack and prepare for Turnov leg of the trip.', color: 'blue' },
+          { time: '4:00 PM', desc: 'Relaxed evening. Early bed.', color: 'blue' }
+        ],
+        mapQuery: '50.0865,14.4038',
+        mapZoom: 15,
+        food: [
+          { name: 'Mala Strana cafe', desc: 'Quiet coffee and pastry', price: '80-150 CZK' },
+          { name: 'Local restaurant', desc: 'Easy lunch nearby', price: '200-300 CZK / main' }
+        ],
+        practical: [
+          'Good day to rest before the Turnov travel day',
+          'Make sure you know what cash you need for Turnov apartment',
+          'Check train times for Apr 10 to Turnov'
+        ]
+      }
+    ]
+  },
+  {
+    id: 'apr9',
+    date: 'Apr 9',
+    dow: 'Thu',
+    label: 'Everyone\'s Last Prague Day',
+    location: 'Prague',
+    plans: [
+      {
+        name: 'Pack & Prep for Turnov',
+        emoji: '',
+        summary: 'Everyone\'s last Prague day. Pack for Turnov, ATM withdrawal (~14,000 CZK for apartment), buy train snacks, easy afternoon, farewell Prague dinner together.',
+        recommended: true,
+        warning: '',
+        tags: ['Practical', 'Cash Needed', 'Everyone Together'],
+        timeline: [
+          { time: '10:00 AM', desc: 'Final morning in the Mala Strana neighborhood. Easy start.', color: 'blue' },
+          { time: '11:00 AM', desc: 'ATM withdrawal for Turnov apartment: ~14,000 CZK needed (apartment is cash only: \u20AC460 + \u20AC90 deposit).', color: 'orange' },
+          { time: '11:30 AM', desc: 'Buy train snacks: water, fruit, crackers for the kids.', color: 'orange' },
+          { time: '12:00 PM', desc: 'Lunch out together in Mala Strana.', color: 'orange' },
+          { time: '2:00 PM', desc: 'Pack for Turnov. Double check the train schedule on cd.cz.', color: 'blue' },
+          { time: '4:00 PM', desc: 'Easy afternoon walk. Last look at favorite Prague spots.', color: 'green' },
+          { time: '6:30 PM', desc: 'Farewell Prague dinner together -- all 6 of us. Pick a favorite restaurant from the trip.', color: 'orange' }
+        ],
+        mapQuery: '50.0865,14.4038',
+        mapZoom: 15,
+        food: [
+          { name: 'Your favorite from the trip', desc: 'Go back to the best restaurant you found!', price: 'Varies' },
+          { name: 'Mala Strana restaurants', desc: 'Plenty of charming options for a farewell dinner', price: '200-400 CZK / main' }
+        ],
+        practical: [
+          'IMPORTANT: Withdraw ~14,000 CZK cash for Turnov apartment (covers rent + deposit)',
+          'Turnov apartment: \u20AC460 + \u20AC90 deposit, paid in CZK cash',
+          'Buy train snacks -- the journey is about 2.5 hours',
+          'Check train schedule: Praha hlavni nadrazi to Turnov on cd.cz',
+          'Pack light for the train -- you\'ll be walking with luggage',
+          'Everyone travels together to Turnov tomorrow -- all 6 guests'
+        ]
+      },
+      {
+        name: 'Last Sights + Pack',
+        emoji: '',
+        summary: 'Catch anything you missed in Prague, then pack and prep for Turnov in the afternoon.',
+        recommended: false,
+        warning: '',
+        tags: ['Flexible', 'Cash Needed'],
+        timeline: [
+          { time: '9:30 AM', desc: 'Morning outing: revisit a favorite spot or catch something you missed.', color: 'blue' },
+          { time: '11:00 AM', desc: 'ATM withdrawal: ~14,000 CZK for Turnov apartment.', color: 'orange' },
+          { time: '12:00 PM', desc: 'Lunch together.', color: 'orange' },
+          { time: '2:00 PM', desc: 'Pack for Turnov. Buy train snacks.', color: 'blue' },
+          { time: '4:00 PM', desc: 'Easy afternoon. Early bed before travel day.', color: 'blue' }
+        ],
+        mapQuery: '50.0865,14.4038',
+        mapZoom: 15,
+        food: [
+          { name: 'Local spot', desc: 'Last lunch in Mala Strana', price: '200-350 CZK / main' }
+        ],
+        practical: [
+          'IMPORTANT: Withdraw ~14,000 CZK cash for Turnov apartment',
+          'Buy train snacks for the ~2.5 hour journey',
+          'Check train times on cd.cz -- aim for ~9:30-10:00 AM departure tomorrow',
+          'Everyone travels to Turnov together tomorrow'
+        ]
+      }
+    ]
+  },
+  {
+    id: 'apr10',
+    date: 'Apr 10',
+    dow: 'Fri',
+    label: 'Travel to Turnov',
+    location: 'Travel',
+    plans: [
+      {
+        name: 'Arrive & Settle In',
+        emoji: '',
+        summary: 'All 6 guests travel together by train to Turnov. Check into Simakova Vila. Evening walk and dinner.',
+        recommended: true,
+        warning: '',
+        tags: ['Travel Day', 'Cash Needed', 'Everyone Together'],
+        timeline: [
+          { time: '9:00 AM', desc: 'Check out of Kaiserstein Palace. ATM withdrawal if not done yesterday (~14,000 CZK for apartment).', color: 'orange' },
+          { time: '9:30 AM', desc: 'Head to Praha hlavni nadrazi (main train station). All 6 of us together.', color: 'blue' },
+          { time: '10:00 AM', desc: 'Train from Praha hlavni nadrazi to Turnov (~2.5 hrs, direct Rychlik). Buy tickets at cd.cz -- group discount available. 4-year-old rides free, 6-year-old half price. ~600-900 CZK total.', color: 'blue' },
+          { time: '12:30 PM', desc: 'Arrive in Turnov. Walk to Simakova Vila (15 min, 0.8 mi) or taxi (~100 CZK).', color: 'green' },
+          { time: '3:00 PM', desc: 'Check-in window: 3-8 PM. Pay apartment in CZK cash (\u20AC460 + \u20AC90 deposit \u2248 14,000 CZK). Booking is for all 6 guests.', color: 'orange' },
+          { time: '4:00 PM', desc: 'Settle in. Walk around the neighborhood.', color: 'green' },
+          { time: '5:00 PM', desc: 'Walk to Muzeum Ceskeho Raje if energy (4 min walk, 300m from apartment).', color: 'blue' },
+          { time: '6:30 PM', desc: 'Dinner in Turnov. Try Restaurace Paradiso or Strelnice.', color: 'orange' }
+        ],
+        mapQuery: '50.5875,15.1567',
+        mapZoom: 14,
+        food: [
+          { name: 'Restaurace Paradiso', desc: 'Pizza and Italian, kid-friendly', price: '150-250 CZK / main' },
+          { name: 'Restaurace Strelnice', desc: 'Traditional Czech restaurant in Turnov center', price: '150-280 CZK / main' }
+        ],
+        practical: [
+          'ALL 6 GUESTS travel together: Abe, Allie, Eloise, Thomas, Cliff, Denise',
+          'CASH: You need ~14,000 CZK for the apartment (rent + deposit)',
+          'Train is about 2.5 hours. Book tickets at cd.cz -- group discount available.',
+          '4-year-old rides free, 6-year-old half price. ~600-900 CZK total for group.',
+          'Recommended ~9:30-10:00 AM departure, arrive ~12:00-12:30',
+          'Walk from station to Simakova Vila is 15 min (0.8 mi) or taxi ~100 CZK',
+          'Check-in is 3-8 PM -- coordinate with host',
+          'Muzeum Ceskeho Raje is a 4 min walk (300m) from apartment',
+          'Download mapy.cz app for trail maps, cd.cz or idos.cz for train schedules'
+        ]
+      }
+    ]
+  },
+  {
+    id: 'apr11',
+    date: 'Apr 11',
+    dow: 'Sat',
+    label: 'Castles Open!',
+    location: 'Turnov',
+    plans: [
+      {
+        name: 'The Classic Walk',
+        emoji: '',
+        summary: 'Hruba Skala rock city, walk to Valdstejn Castle, hike back to Turnov. THE must-do route.',
+        recommended: true,
+        warning: '',
+        tags: ['Recommended', 'Castles Open', 'Kid-Friendly', 'Beer Available'],
+        timeline: [
+          { time: '9:00 AM', desc: 'Turnov Taxi (800 414 007, turnovtaxi.cz) — call day before based on weather. Taxi drops you at Hruba Skala (250 CZK, 12 min).', color: 'orange' },
+          { time: '9:15 AM', desc: 'Explore Hruba Skala rock city trails. Short loop ~45 min, viewpoints.', color: 'green' },
+          { time: '11:00 AM', desc: 'Lunch at Hotel Hruba Skala restaurant (mains 200-350 CZK). Beautiful setting.', color: 'orange' },
+          { time: '12:00 PM', desc: 'Walk trail to Valdstejn Castle (2.2 mi, ~1 hr, well-marked, stroller-friendly).', color: 'green' },
+          { time: '1:30 PM', desc: 'Explore Valdstejn Castle (OPEN weekends in April!). Rock-hewn hermitage, bridge, chapel.', color: 'blue' },
+          { time: '2:30 PM', desc: 'Walk home to Turnov via Hlavatice viewpoint (2.5 mi, ~1 hr, mostly downhill).', color: 'green' },
+          { time: '4:00 PM', desc: 'Beer in Turnov! Restaurace Střelnice or any pub with Svijany on tap (local brewery, just 5km away).', color: 'orange' }
+        ],
+        mapQuery: '50.5526,15.1925',
+        mapZoom: 13,
+        food: [
+          { name: 'Hotel Hruba Skala restaurant', desc: 'Sit-down restaurant in the castle hotel. Czech classics.', price: '200-350 CZK / main' },
+          { name: 'Valdstejn kiosk', desc: 'Sausages and drinks at the castle (weekends only)', price: '50-100 CZK' },
+          { name: 'Restaurace Střelnice', desc: 'Czech pub-restaurant with garden, Svijany on tap. Great post-hike beer.', price: '140-220 CZK / main' }
+        ],
+        practical: [
+          'Total walking: ~4.7 miles (7.5 km)',
+          'TAXI: Call the day before based on weather. Pickup/dropoff model.',
+          'Valdstejn Castle interiors OPEN weekends in April',
+          'Trail is stroller-friendly (forest path, some roots)',
+          'Bring: snacks, water, layers, sturdy shoes',
+          'Hlavatice viewpoint is the highlight of the walk back',
+          'Download mapy.cz app for trail maps'
+        ]
+      },
+      {
+        name: 'Kost Castle',
+        emoji: '',
+        summary: 'Best-preserved Gothic castle in Český Ráj. Two tour routes, Plakánek Valley walk, courtyard. OPEN weekends only (Sat-Sun 10-16).',
+        recommended: false,
+        warning: '',
+        tags: ['Castles Open', 'Half Day', 'Kid-Friendly'],
+        timeline: [
+          { time: '9:15 AM', desc: 'Turnov Taxi (800 414 007) — call day before. Taxi to Kost Castle (400 CZK, 20-25 min).', color: 'orange' },
+          { time: '9:45 AM', desc: 'Walk from parking through Plakánek Valley to castle (10 min, beautiful stream trail — kids love it).', color: 'green' },
+          { time: '10:00 AM', desc: 'Route I tour: main halls, Knight\'s Hall, chapel, period rooms (~45 min). Czech with English text sheet available.', color: 'blue' },
+          { time: '11:00 AM', desc: 'Route II tour: tower climb + fortifications + dungeons (~35 min). Steep stairs in White Tower — Eloise fine, consider skipping tower with Thomas.', color: 'blue' },
+          { time: '11:45 AM', desc: 'Explore courtyard, snack break. Castle tavern may be open on weekends.', color: 'orange' },
+          { time: '12:15 PM', desc: 'Walk back through Plakánek Valley to parking. Optional: extend the valley walk (gentle, flat, along stream).', color: 'green' },
+          { time: '12:45 PM', desc: 'Taxi pickup back to Turnov (400 CZK, 20-25 min).', color: 'orange' },
+          { time: '1:15 PM', desc: 'Lunch in Turnov. Afternoon free — rest, playground, museum.', color: 'orange' },
+          { time: '6:00 PM', desc: 'Dinner in Turnov.', color: 'orange' }
+        ],
+        mapQuery: 'Hrad+Kost,+Czech+Republic',
+        mapZoom: 13,
+        food: [
+          { name: 'Kost castle tavern', desc: 'Sausages, beer, snacks in courtyard (weekends, seasonal)', price: '50-150 CZK' },
+          { name: 'Turnov restaurants', desc: 'Lunch/dinner back in town', price: '150-280 CZK / main' }
+        ],
+        practical: [
+          'OPEN weekends only in April (Sat-Sun, 10:00-16:00)!',
+          'TAXI: Call day before. Pickup 9:15 AM, pickup back ~12:45 PM from Kost parking.',
+          'Taxi from Turnov: ~400 CZK each way (20-25 min)',
+          'Kost: family ticket ~400-500 CZK per route. Both routes ~700-900 CZK family total.',
+          'Bring cash (CZK) — may not accept cards',
+          'Dress warm — stone castle interiors are cold in April',
+          'Plakánek Valley walk is free and gorgeous — don\'t skip it',
+          'kost-hrad.cz/en/tourist-information for current hours'
+        ]
+      },
+      {
+        name: 'Mala Skala + Vranov',
+        emoji: '',
+        summary: 'Train to Mala Skala (9 min!), explore Vranov rock castle, lunch at microbrewery. No taxi needed.',
+        recommended: false,
+        warning: '',
+        tags: ['No Taxi Needed', 'Kid-Friendly', 'Beer Available', 'Adventure'],
+        timeline: [
+          { time: '9:30 AM', desc: 'Train Turnov to Mala Skala (9 min, ~50 CZK). Check idos.cz for times, trains roughly hourly.', color: 'blue' },
+          { time: '10:00 AM', desc: 'Walk uphill from village to Vranov-Pantheon (steep 25 min climb with stairs).', color: 'green' },
+          { time: '10:30 AM', desc: 'Explore Vranov: rock-carved castle maze, passages, hermit\'s cave, viewpoints 60m above river. Family ticket 100 CZK cash.', color: 'green' },
+          { time: '11:30 AM', desc: 'Descend back to village.', color: 'green' },
+          { time: '12:00 PM', desc: 'Lunch at Maloskalsky Pivovar (microbrewery, great Czech food + house beer, outdoor terrace).', color: 'orange' },
+          { time: '1:30 PM', desc: 'Optional: explore Besedice Rocks labyrinths (natural rock maze, free, kids love it, ~1 hr).', color: 'green' },
+          { time: '2:30 PM', desc: 'Train back to Turnov (9 min).', color: 'blue' },
+          { time: '3:00 PM', desc: 'Afternoon/evening free in Turnov.', color: 'blue' }
+        ],
+        mapQuery: '50.6167,15.1833',
+        mapZoom: 13,
+        food: [
+          { name: 'Maloskalsky Pivovar', desc: 'Microbrewery with great Czech food + house beer, outdoor terrace', price: '150-250 CZK / main' },
+          { name: 'Pizzeria Pietro Tomasso', desc: 'Kid-friendly, playground', price: '120-200 CZK / main' }
+        ],
+        practical: [
+          'NO TAXI NEEDED -- take the train!',
+          'Train Turnov to Mala Skala: 9 min, roughly hourly, ~50 CZK',
+          'Vranov open in April! Family ticket 100 CZK cash.',
+          'Steep 25 min climb to Vranov with stairs -- bring sturdy shoes',
+          'Besedice Rocks: natural rock maze, free, kids love it',
+          'Frydstejn Castle 2km further but doesn\'t open until May -- skip it',
+          'Check idos.cz for train times'
+        ]
+      }
+    ]
+  },
+  {
+    id: 'apr12',
+    date: 'Apr 12',
+    dow: 'Sun',
+    label: 'Castles Open!',
+    location: 'Turnov',
+    plans: [
+      {
+        name: 'The Classic Walk',
+        emoji: '',
+        summary: 'Hruba Skala rock city, walk to Valdstejn Castle, hike back to Turnov. Do whichever you didn\'t do Saturday!',
+        recommended: true,
+        warning: '',
+        tags: ['Recommended', 'Castles Open', 'Kid-Friendly', 'Beer Available'],
+        timeline: [
+          { time: '9:00 AM', desc: 'Turnov Taxi (800 414 007, turnovtaxi.cz) — call day before based on weather. Taxi drops you at Hruba Skala (250 CZK, 12 min).', color: 'orange' },
+          { time: '9:15 AM', desc: 'Explore Hruba Skala rock city trails. Short loop ~45 min, viewpoints.', color: 'green' },
+          { time: '11:00 AM', desc: 'Lunch at Hotel Hruba Skala restaurant (mains 200-350 CZK). Beautiful setting.', color: 'orange' },
+          { time: '12:00 PM', desc: 'Walk trail to Valdstejn Castle (2.2 mi, ~1 hr, well-marked, stroller-friendly).', color: 'green' },
+          { time: '1:30 PM', desc: 'Explore Valdstejn Castle (OPEN weekends in April!). Rock-hewn hermitage, bridge, chapel.', color: 'blue' },
+          { time: '2:30 PM', desc: 'Walk home to Turnov via Hlavatice viewpoint (2.5 mi, ~1 hr, mostly downhill).', color: 'green' },
+          { time: '4:00 PM', desc: 'Beer in Turnov! Restaurace Střelnice or any pub with Svijany on tap (local brewery, just 5km away).', color: 'orange' }
+        ],
+        mapQuery: '50.5526,15.1925',
+        mapZoom: 13,
+        food: [
+          { name: 'Hotel Hruba Skala restaurant', desc: 'Sit-down restaurant in the castle hotel. Czech classics.', price: '200-350 CZK / main' },
+          { name: 'Valdstejn kiosk', desc: 'Sausages and drinks at the castle (weekends only)', price: '50-100 CZK' },
+          { name: 'Restaurace Střelnice', desc: 'Czech pub-restaurant with garden, Svijany on tap. Great post-hike beer.', price: '140-220 CZK / main' }
+        ],
+        practical: [
+          'Do whichever plans you didn\'t do Saturday!',
+          'Total walking: ~4.7 miles (7.5 km)',
+          'TAXI: Call the day before based on weather. Pickup/dropoff model.',
+          'Valdstejn Castle interiors OPEN weekends in April',
+          'Trail is stroller-friendly (forest path, some roots)',
+          'Bring: snacks, water, layers, sturdy shoes',
+          'Hlavatice viewpoint is the highlight of the walk back'
+        ]
+      },
+      {
+        name: 'Kost Castle',
+        emoji: '',
+        summary: 'Best-preserved Gothic castle in Český Ráj. Two tour routes, Plakánek Valley walk, courtyard. OPEN weekends only (Sat-Sun 10-16).',
+        recommended: false,
+        warning: '',
+        tags: ['Castles Open', 'Half Day', 'Kid-Friendly'],
+        timeline: [
+          { time: '9:15 AM', desc: 'Turnov Taxi (800 414 007) — call day before. Taxi to Kost Castle (400 CZK, 20-25 min).', color: 'orange' },
+          { time: '9:45 AM', desc: 'Walk from parking through Plakánek Valley to castle (10 min, beautiful stream trail — kids love it).', color: 'green' },
+          { time: '10:00 AM', desc: 'Route I tour: main halls, Knight\'s Hall, chapel, period rooms (~45 min). Czech with English text sheet available.', color: 'blue' },
+          { time: '11:00 AM', desc: 'Route II tour: tower climb + fortifications + dungeons (~35 min). Steep stairs in White Tower — Eloise fine, consider skipping tower with Thomas.', color: 'blue' },
+          { time: '11:45 AM', desc: 'Explore courtyard, snack break. Castle tavern may be open on weekends.', color: 'orange' },
+          { time: '12:15 PM', desc: 'Walk back through Plakánek Valley to parking. Optional: extend the valley walk (gentle, flat, along stream).', color: 'green' },
+          { time: '12:45 PM', desc: 'Taxi pickup back to Turnov (400 CZK, 20-25 min).', color: 'orange' },
+          { time: '1:15 PM', desc: 'Lunch in Turnov. Afternoon free — rest, playground, museum.', color: 'orange' },
+          { time: '6:00 PM', desc: 'Dinner in Turnov.', color: 'orange' }
+        ],
+        mapQuery: 'Hrad+Kost,+Czech+Republic',
+        mapZoom: 13,
+        food: [
+          { name: 'Kost castle tavern', desc: 'Sausages, beer, snacks in courtyard (weekends, seasonal)', price: '50-150 CZK' },
+          { name: 'Turnov restaurants', desc: 'Lunch/dinner back in town', price: '150-280 CZK / main' }
+        ],
+        practical: [
+          'OPEN weekends only in April (Sat-Sun, 10:00-16:00)!',
+          'TAXI: Call day before. Pickup 9:15 AM, pickup back ~12:45 PM from Kost parking.',
+          'Taxi from Turnov: ~400 CZK each way (20-25 min)',
+          'Kost: family ticket ~400-500 CZK per route. Both routes ~700-900 CZK family total.',
+          'Bring cash (CZK) — may not accept cards',
+          'Dress warm — stone castle interiors are cold in April',
+          'Plakánek Valley walk is free and gorgeous — don\'t skip it',
+          'kost-hrad.cz/en/tourist-information for current hours'
+        ]
+      },
+      {
+        name: 'Mala Skala + Vranov',
+        emoji: '',
+        summary: 'Train to Mala Skala (9 min!), explore Vranov rock castle, lunch at microbrewery. No taxi needed.',
+        recommended: false,
+        warning: '',
+        tags: ['No Taxi Needed', 'Kid-Friendly', 'Beer Available', 'Adventure'],
+        timeline: [
+          { time: '9:30 AM', desc: 'Train Turnov to Mala Skala (9 min, ~50 CZK). Check idos.cz for times, trains roughly hourly.', color: 'blue' },
+          { time: '10:00 AM', desc: 'Walk uphill from village to Vranov-Pantheon (steep 25 min climb with stairs).', color: 'green' },
+          { time: '10:30 AM', desc: 'Explore Vranov: rock-carved castle maze, passages, hermit\'s cave, viewpoints 60m above river. Family ticket 100 CZK cash.', color: 'green' },
+          { time: '11:30 AM', desc: 'Descend back to village.', color: 'green' },
+          { time: '12:00 PM', desc: 'Lunch at Maloskalsky Pivovar (microbrewery, great Czech food + house beer, outdoor terrace).', color: 'orange' },
+          { time: '1:30 PM', desc: 'Optional: explore Besedice Rocks labyrinths (natural rock maze, free, kids love it, ~1 hr).', color: 'green' },
+          { time: '2:30 PM', desc: 'Train back to Turnov (9 min).', color: 'blue' },
+          { time: '3:00 PM', desc: 'Afternoon/evening free in Turnov.', color: 'blue' }
+        ],
+        mapQuery: '50.6167,15.1833',
+        mapZoom: 13,
+        food: [
+          { name: 'Maloskalsky Pivovar', desc: 'Microbrewery with great Czech food + house beer, outdoor terrace', price: '150-250 CZK / main' },
+          { name: 'Pizzeria Pietro Tomasso', desc: 'Kid-friendly, playground', price: '120-200 CZK / main' }
+        ],
+        practical: [
+          'NO TAXI NEEDED -- take the train!',
+          'Train Turnov to Mala Skala: 9 min, roughly hourly, ~50 CZK',
+          'Vranov open in April! Family ticket 100 CZK cash.',
+          'Steep 25 min climb to Vranov with stairs -- bring sturdy shoes',
+          'Besedice Rocks: natural rock maze, free, kids love it',
+          'Frydstejn Castle 2km further but doesn\'t open until May -- skip it',
+          'Check idos.cz for train times'
+        ]
+      }
+    ]
+  },
+  {
+    id: 'apr13',
+    date: 'Apr 13',
+    dow: 'Mon',
+    label: 'Weekday',
+    location: 'Turnov',
+    plans: [
+      {
+        name: 'Klokocske skaly',
+        emoji: '',
+        summary: 'Explore Klokocske pruchody (70m rock passage, medieval trade route!), cliff viewpoints, Rostejn castle ruins.',
+        recommended: false,
+        warning: 'Watch kids near cliff edges (no barriers!)',
+        tags: ['Adventure', 'Kid-Friendly', 'Nature'],
+        timeline: [
+          { time: '9:30 AM', desc: 'Turnov Taxi (800 414 007) — call day before. Taxi to Zaholice trailhead (200 CZK, ~8 min).', color: 'orange' },
+          { time: '9:45 AM', desc: 'Explore: Klokocske pruchody (70m rock passage, medieval trade route!), cliff viewpoints, Rostejn castle ruins. Shorter loop (not full 10km -- too much for kids). ~2-2.5 hrs.', color: 'green' },
+          { time: '12:30 PM', desc: 'Taxi pickup back to Turnov from Zaholice trailhead.', color: 'orange' },
+          { time: '1:00 PM', desc: 'Lunch in Turnov.', color: 'orange' },
+          { time: '2:00 PM', desc: 'Afternoon: Museum if not done, or rest.', color: 'blue' }
+        ],
+        mapQuery: '50.5650,15.2050',
+        mapZoom: 13,
+        food: [
+          { name: 'Hasicarna Klokoci', desc: 'Restaurant in the village near the trails', price: '120-220 CZK / main' },
+          { name: 'Turnov restaurants', desc: 'Lunch back in town', price: '150-280 CZK / main' }
+        ],
+        practical: [
+          'TAXI: Call day before. Pickup 9:30 AM, dropoff at Zaholice trailhead. Pickup ~13:00 from same spot.',
+          'Castle INTERIORS likely closed (weekday). Trails and grounds still accessible.',
+          'Klokocske pruchody: 70m rock passage -- medieval trade route!',
+          'Shorter loop only -- full 10km is too much for kids',
+          'Bring: snacks, water, sturdy shoes',
+          'WARNING: Watch kids near cliff edges (no barriers!)'
+        ]
+      },
+      {
+        name: 'Museum + Valdstejn Walk',
+        emoji: '',
+        summary: 'Morning at Muzeum Ceskeho Raje (gems, minerals, garnets), then afternoon walk to Valdstejn and back. Great rainy-morning option.',
+        recommended: false,
+        warning: '',
+        tags: ['Rainy Day Backup', 'Kid-Friendly', 'Museum', 'No Taxi Needed'],
+        timeline: [
+          { time: '9:30 AM', desc: 'Walk to Muzeum Ceskeho Raje (4 min walk, 300m). Gems, minerals, garnets, history. 1-2 hrs.', color: 'blue' },
+          { time: '11:30 AM', desc: 'Lunch in Turnov. Daily menu (denni menu) at Strelnice: 120-160 CZK for soup + main.', color: 'orange' },
+          { time: '1:00 PM', desc: 'Walk to Valdstejn Castle and back (5 mi round trip). Grounds accessible even if interior closed. Hlavatice viewpoint.', color: 'green' },
+          { time: '4:00 PM', desc: 'Beer in Turnov!', color: 'orange' }
+        ],
+        mapQuery: '50.5875,15.1567',
+        mapZoom: 14,
+        food: [
+          { name: 'Restaurace Strelnice', desc: 'Daily lunch menu (denni menu) -- great value: soup + main', price: '120-160 CZK / lunch menu' },
+          { name: 'Restaurace Paradiso', desc: 'Pizza and Italian in Turnov', price: '150-250 CZK / main' }
+        ],
+        practical: [
+          'No taxi needed -- all walking!',
+          'Museum is 4 min walk from apartment -- great rainy morning option',
+          'Museum has gems, minerals, garnets, and local history',
+          'Walk to Valdstejn is 5 miles round trip (8 km)',
+          'Castle grounds accessible even if interior closed on weekdays',
+          'Hlavatice viewpoint is on the return route',
+          'Great split: museum in morning if rain, walk in afternoon if weather clears'
+        ]
+      },
+      {
+        name: 'Rock Trails Day',
+        emoji: '',
+        summary: 'Same as Classic Walk route but Valdstejn interior may be closed (grounds still great). Focus on trails and scenery.',
+        recommended: false,
+        warning: 'Valdstejn Castle interior likely CLOSED on weekdays. Grounds still great.',
+        tags: ['Hiking', 'Kid-Friendly', 'Beer Available'],
+        timeline: [
+          { time: '9:00 AM', desc: 'Turnov Taxi (800 414 007) — call day before. Taxi to Hruba Skala (250 CZK, 12 min).', color: 'orange' },
+          { time: '9:15 AM', desc: 'Explore Hruba Skala rock city trails (short loop ~45 min).', color: 'green' },
+          { time: '11:00 AM', desc: 'Lunch at Hotel Hruba Skala restaurant.', color: 'orange' },
+          { time: '12:00 PM', desc: 'Walk trail toward Valdstejn Castle (2.2 mi, ~1 hr).', color: 'green' },
+          { time: '1:30 PM', desc: 'Explore Valdstejn grounds (interior may be closed weekday). Still beautiful.', color: 'blue' },
+          { time: '2:30 PM', desc: 'Walk home to Turnov via Hlavatice viewpoint (2.5 mi, ~1 hr).', color: 'green' },
+          { time: '4:00 PM', desc: 'Beer in Turnov!', color: 'orange' }
+        ],
+        mapQuery: '50.5526,15.1925',
+        mapZoom: 13,
+        food: [
+          { name: 'Hotel Hruba Skala restaurant', desc: 'Czech classics in a castle hotel setting', price: '200-350 CZK / main' },
+          { name: 'Turnov restaurants', desc: 'Post-hike beer and food', price: '120-280 CZK / main' }
+        ],
+        practical: [
+          'Castle interiors likely CLOSED on weekdays in April',
+          'Grounds and trails still fully accessible and beautiful',
+          'Focus on trails and scenery rather than castle interiors',
+          'Hlavatice viewpoint is the highlight regardless',
+          'Total walking: ~4.7 miles',
+          'Bring: snacks, water, layers, sturdy shoes'
+        ]
+      },
+      {
+        name: 'Easy Day',
+        emoji: '',
+        summary: 'Sleep in, explore Turnov town, playground, cafes. Walk to Dlaskuv statek historic farm if energy.',
+        recommended: false,
+        warning: '',
+        tags: ['Easy Day', 'Rest', 'Kid-Friendly'],
+        timeline: [
+          { time: '10:00 AM', desc: 'Sleep in. Slow morning at the apartment.', color: 'blue' },
+          { time: '11:00 AM', desc: 'Explore Turnov: main square, local shops, playground, cafes.', color: 'green' },
+          { time: '12:00 PM', desc: 'Lunch in Turnov.', color: 'orange' },
+          { time: '2:00 PM', desc: 'Optional: Walk to Dlaskuv statek historic farm (1.9 mi) along Jizera river if energy.', color: 'green' },
+          { time: '4:00 PM', desc: 'Free afternoon. Rest up.', color: 'blue' },
+          { time: '6:00 PM', desc: 'Farewell-ish dinner in Turnov.', color: 'orange' }
+        ],
+        mapQuery: '50.5875,15.1567',
+        mapZoom: 14,
+        food: [
+          { name: 'Turnov restaurants', desc: 'Try somewhere you haven\'t been yet', price: '150-280 CZK / main' }
+        ],
+        practical: [
+          'Good day to rest and recharge',
+          'Dlaskuv statek: traditional Bohemian timber farm, 1.9 mi walk along river',
+          'Turnov has a nice main square and local shops worth exploring',
+          'Playground for the kids in town center'
+        ]
+      }
+    ]
+  },
+  {
+    id: 'apr14',
+    date: 'Apr 14',
+    dow: 'Tue',
+    label: 'Last Full Turnov Day',
+    location: 'Turnov',
+    plans: [
+      {
+        name: 'Klokocske skaly',
+        emoji: '',
+        summary: 'Explore Klokocske pruchody (70m rock passage, medieval trade route!), cliff viewpoints, Rostejn castle ruins.',
+        recommended: false,
+        warning: 'Watch kids near cliff edges (no barriers!)',
+        tags: ['Adventure', 'Kid-Friendly', 'Nature'],
+        timeline: [
+          { time: '9:30 AM', desc: 'Turnov Taxi (800 414 007) — call day before. Taxi to Zaholice trailhead (200 CZK, ~8 min).', color: 'orange' },
+          { time: '9:45 AM', desc: 'Explore: Klokocske pruchody (70m rock passage, medieval trade route!), cliff viewpoints, Rostejn castle ruins. Shorter loop ~2-2.5 hrs.', color: 'green' },
+          { time: '12:30 PM', desc: 'Taxi pickup back to Turnov from Zaholice trailhead.', color: 'orange' },
+          { time: '1:00 PM', desc: 'Lunch in Turnov.', color: 'orange' },
+          { time: '2:00 PM', desc: 'Afternoon: Museum if not done, or rest.', color: 'blue' }
+        ],
+        mapQuery: '50.5650,15.2050',
+        mapZoom: 13,
+        food: [
+          { name: 'Hasicarna Klokoci', desc: 'Restaurant in the village near the trails', price: '120-220 CZK / main' },
+          { name: 'Turnov restaurants', desc: 'Lunch back in town', price: '150-280 CZK / main' }
+        ],
+        practical: [
+          'TAXI: Call day before. Pickup 9:30 AM, dropoff at Zaholice trailhead. Pickup ~13:00 from same spot.',
+          'Castle INTERIORS likely closed (weekday). Trails and grounds still accessible.',
+          'Klokocske pruchody: 70m rock passage -- medieval trade route!',
+          'Shorter loop only -- full 10km is too much for kids',
+          'Bring: snacks, water, sturdy shoes',
+          'WARNING: Watch kids near cliff edges (no barriers!)'
+        ]
+      },
+      {
+        name: 'Museum + Valdstejn Walk',
+        emoji: '',
+        summary: 'Morning at Muzeum Ceskeho Raje (gems, minerals, garnets), then afternoon walk to Valdstejn and back.',
+        recommended: false,
+        warning: '',
+        tags: ['Rainy Day Backup', 'Kid-Friendly', 'Museum', 'No Taxi Needed'],
+        timeline: [
+          { time: '9:30 AM', desc: 'Walk to Muzeum Ceskeho Raje (4 min walk, 300m). Gems, minerals, garnets, history. 1-2 hrs.', color: 'blue' },
+          { time: '11:30 AM', desc: 'Lunch in Turnov. Daily menu (denni menu) at Strelnice: 120-160 CZK for soup + main.', color: 'orange' },
+          { time: '1:00 PM', desc: 'Walk to Valdstejn Castle and back (5 mi round trip). Grounds accessible even if interior closed. Hlavatice viewpoint.', color: 'green' },
+          { time: '4:00 PM', desc: 'Beer in Turnov!', color: 'orange' }
+        ],
+        mapQuery: '50.5875,15.1567',
+        mapZoom: 14,
+        food: [
+          { name: 'Restaurace Strelnice', desc: 'Daily lunch menu (denni menu) -- great value: soup + main', price: '120-160 CZK / lunch menu' },
+          { name: 'Restaurace Paradiso', desc: 'Pizza and Italian in Turnov', price: '150-250 CZK / main' }
+        ],
+        practical: [
+          'No taxi needed -- all walking!',
+          'Museum is a 4 min walk -- great rainy morning option',
+          'Walk to Valdstejn is 5 miles round trip',
+          'Hlavatice viewpoint is on the return route',
+          'Good split: museum in morning if rain, walk in afternoon if weather clears'
+        ]
+      },
+      {
+        name: 'Prachov Rocks',
+        emoji: '',
+        summary: 'Sandstone rock labyrinth with narrow passages, carved stairs, viewpoints. Taxi both ways (25 min each way).',
+        recommended: false,
+        warning: '',
+        tags: ['Kid-Friendly', 'Adventure', 'Nature', 'Open Daily'],
+        timeline: [
+          { time: '9:00 AM', desc: 'Taxi to Prachov Rocks (25 min each way, ~600-750 CZK one way). Arrange pickup/dropoff times with driver.', color: 'orange' },
+          { time: '9:30 AM', desc: 'Enter Prachov Rocks. Short loop trail 1 hr, long loop 2 hrs. Entrance fee ~80 CZK/adult.', color: 'green' },
+          { time: '11:30 AM', desc: 'Lunch at entrance restaurant.', color: 'orange' },
+          { time: '12:30 PM', desc: 'Taxi pickup back to Turnov.', color: 'orange' },
+          { time: '1:00 PM', desc: 'Afternoon free in Turnov.', color: 'blue' }
+        ],
+        mapQuery: '50.4647,15.2778',
+        mapZoom: 13,
+        food: [
+          { name: 'Restaurace at Prachov entrance', desc: 'Basic Czech food at the park entrance', price: '120-200 CZK / main' },
+          { name: 'Hotel Zatisi', desc: 'Nearby hotel restaurant', price: '150-250 CZK / main' }
+        ],
+        practical: [
+          'Entrance: ~80 CZK/adult',
+          'Open daily in April',
+          'Taxi: 25 min each way, ~600-750 CZK one way (~1,300-1,500 CZK round trip — priciest day trip). Arrange pickup/dropoff times.',
+          'Short loop: 1 hour, Long loop: 2 hours',
+          'Great for kids -- they love the narrow rock passages'
+        ]
+      },
+      {
+        name: 'Easy Last Day',
+        emoji: '',
+        summary: 'Sleep in, pack, easy Turnov stroll, farewell dinner. Check-out tomorrow at 10 AM.',
+        recommended: false,
+        warning: '',
+        tags: ['Easy Day', 'Rest', 'Beer Available'],
+        timeline: [
+          { time: '10:00 AM', desc: 'Sleep in. Slow morning at the apartment.', color: 'blue' },
+          { time: '11:00 AM', desc: 'Walk around Turnov: main square, local shops, playground.', color: 'green' },
+          { time: '12:00 PM', desc: 'Lunch at a restaurant you haven\'t tried yet.', color: 'orange' },
+          { time: '2:00 PM', desc: 'Pack up for tomorrow\'s checkout (10 AM).', color: 'blue' },
+          { time: '3:00 PM', desc: 'Free time. Last walk around the neighborhood.', color: 'green' },
+          { time: '6:00 PM', desc: 'Farewell dinner in Turnov. Try Svijany beer one last time.', color: 'orange' }
+        ],
+        mapQuery: '50.5875,15.1567',
+        mapZoom: 14,
+        food: [
+          { name: 'Try somewhere new', desc: 'Pick a Turnov restaurant you haven\'t been to', price: '150-280 CZK / main' },
+          { name: 'Svijany beer', desc: 'Local brewery -- have one last pint', price: '40-60 CZK / pint' }
+        ],
+        practical: [
+          'Check-out tomorrow is 10 AM -- pack tonight!',
+          'Make sure you have train tickets for tomorrow',
+          'Svijany brewery is local to this region -- drink it while you can!',
+          'Easy day to rest up for the travel back to Prague'
+        ]
+      }
+    ]
+  },
+  {
+    id: 'apr15',
+    date: 'Apr 15',
+    dow: 'Wed',
+    label: 'Travel Back',
+    location: 'Travel',
+    plans: [
+      {
+        name: 'Back to Prague',
+        emoji: '',
+        summary: 'ALL 6 guests travel back together. Check out of Simakova Vila, train to Prague. Split into hotels. Last evening together.',
+        recommended: true,
+        warning: '',
+        tags: ['Travel Day', 'Hotel Perks', 'Everyone Together'],
+        timeline: [
+          { time: '9:00 AM', desc: 'Final packing. Clean up the apartment.', color: 'blue' },
+          { time: '10:00 AM', desc: 'Check out of Simakova Vila by 10 AM. All 6 guests together.', color: 'orange' },
+          { time: '10:30 AM', desc: 'Walk to Turnov train station (15 min) or taxi.', color: 'blue' },
+          { time: '11:00 AM', desc: 'Train from Turnov to Prague (~2.5 hours). Scenic ride back.', color: 'blue' },
+          { time: '1:30 PM', desc: 'Arrive at Praha hlavni nadrazi.', color: 'blue' },
+          { time: '2:00 PM', desc: 'Lunch near the train station or at the hotel area.', color: 'orange' },
+          { time: '3:00 PM', desc: 'Abe + Allie + Kids: Check into Andaz Prague (Senovazne nam.). FHR perks: room upgrade, daily breakfast, hotel credit.', color: 'blue' },
+          { time: '3:00 PM', desc: 'Cliff & Denise: Check into Gold Bank Hotel.', color: 'blue' },
+          { time: '4:00 PM', desc: 'Settle in. Explore the neighborhoods.', color: 'blue' },
+          { time: '7:00 PM', desc: 'Last evening in Prague together. Dinner out -- all 6 of us.', color: 'orange' }
+        ],
+        mapQuery: '50.0875,14.4340',
+        mapZoom: 14,
+        food: [
+          { name: 'Andaz area restaurants', desc: 'New Town has many excellent restaurants', price: '250-500 CZK / main' },
+          { name: 'Hotel credit', desc: 'Use your FHR hotel credit for dinner or drinks', price: 'Credit included' }
+        ],
+        practical: [
+          'ALL 6 GUESTS travel back together',
+          'Simakova Vila checkout by 10 AM',
+          'Train Turnov to Prague is about 2.5 hours',
+          'Abe + Allie + Kids: Andaz Prague check-in at 3 PM, FHR perks',
+          'Cliff & Denise: Gold Bank Hotel',
+          'Last evening in Prague together -- make it count!'
+        ]
+      }
+    ]
+  },
+  {
+    id: 'apr16',
+    date: 'Apr 16',
+    dow: 'Thu',
+    label: 'Fly Home',
+    location: 'Travel',
+    plans: [
+      {
+        name: 'Departure',
+        emoji: '',
+        summary: 'Everyone checks out. Head to Vaclav Havel Airport. Fly home.',
+        recommended: true,
+        warning: '',
+        tags: ['Travel Day', 'Airport'],
+        timeline: [
+          { time: '8:00 AM', desc: 'Breakfast at Andaz (included with FHR).', color: 'orange' },
+          { time: '9:00 AM', desc: 'Everyone checks out. Final packing.', color: 'blue' },
+          { time: '10:00 AM', desc: 'Head to Vaclav Havel Airport. Taxi (~600 CZK) or Airport Express bus (100 CZK).', color: 'blue' },
+          { time: '10:30 AM', desc: 'Arrive at airport. Check in, go through security.', color: 'blue' },
+          { time: '12:00 PM', desc: 'Lunch at airport. Relax before flight.', color: 'orange' },
+          { time: '2:00 PM', desc: 'Flights depart for home.', color: 'blue' },
+          { time: '4:00 PM', desc: 'Abe + Allie + Kids: Arrive IAD ~4 PM. Welcome home!', color: 'green' }
+        ],
+        mapQuery: '50.1008,14.2600',
+        mapZoom: 12,
+        food: [
+          { name: 'Andaz breakfast', desc: 'Included with FHR booking', price: 'Included' },
+          { name: 'Airport restaurants', desc: 'Various options after security', price: '200-400 CZK' }
+        ],
+        practical: [
+          'Andaz breakfast is included with FHR -- do not skip it!',
+          'Abe + Allie + Kids: Arrive IAD ~4 PM',
+          'Cliff & Denise: their own flights',
+          'Taxi to airport: ~600 CZK (30 min)',
+          'Airport Express bus: 100 CZK from main station (30-45 min)',
+          'Arrive at airport at least 2.5 hours before international flight',
+          'Spend remaining CZK at duty free or exchange back'
+        ]
+      }
+    ]
+  }
+];
+
+// State
+let selectedDayId = DAYS[0].id;
+let selections = {};
+
+// Load from localStorage
+function loadSelections() {
+  try {
+    const saved = localStorage.getItem('praguetrip_itinerary');
+    if (saved) selections = JSON.parse(saved);
+  } catch (e) {}
+}
+
+function saveSelections() {
+  try {
+    localStorage.setItem('praguetrip_itinerary', JSON.stringify(selections));
+  } catch (e) {}
+}
+
+// Render day strip
+function renderDayStrip() {
+  const strip = document.getElementById('dayStrip');
+  strip.innerHTML = DAYS.map(d => {
+    const locClass = d.location === 'Prague' ? 'loc-prague' : d.location === 'Turnov' ? 'loc-turnov' : 'loc-travel';
+    const activeClass = d.id === selectedDayId ? 'active' : '';
+    const hasPlan = selections[d.id] !== undefined ? 'has-plan' : '';
+    return `<div class="day-tile ${locClass} ${activeClass} ${hasPlan}" onclick="selectDay('${d.id}')">
+      <div class="plan-dot"></div>
+      <div class="day-abbr">${d.dow}</div>
+      <div class="day-date">${d.date}</div>
+      <div class="day-loc">${d.location}</div>
+    </div>`;
+  }).join('');
+
+  // Scroll active tile into view
+  const activeTile = strip.querySelector('.day-tile.active');
+  if (activeTile) {
+    activeTile.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+  }
+}
+
+// Render plans list
+function renderPlans() {
+  const day = DAYS.find(d => d.id === selectedDayId);
+  if (!day) return;
+
+  const list = document.getElementById('plansList');
+  const clearBtn = document.getElementById('clearBtn');
+  const selectedIdx = selections[selectedDayId];
+
+  clearBtn.className = selectedIdx !== undefined ? 'clear-btn visible' : 'clear-btn';
+
+  list.innerHTML = day.plans.map((p, i) => {
+    const sel = selectedIdx === i ? 'selected' : '';
+    const tags = p.tags.map(t => `<span class="tag">${t}</span>`).join('');
+    const recTag = p.recommended ? '<span class="tag rec">Recommended</span>' : '';
+    const warnTag = p.warning ? '<span class="tag warn">Warning</span>' : '';
+    return `<div class="plan-card ${sel}" onclick="selectPlan(${i})">
+      <div class="plan-name">
+        <span class="checkmark">&#10003;</span>
+        ${p.name}
+      </div>
+      <div class="plan-summary">${p.summary}</div>
+      <div class="plan-tags">${recTag}${warnTag}${tags}</div>
+    </div>`;
+  }).join('');
+}
+
+// Render detail panel
+function renderDetail() {
+  const day = DAYS.find(d => d.id === selectedDayId);
+  if (!day) return;
+
+  const empty = document.getElementById('detailEmpty');
+  const content = document.getElementById('detailContent');
+  const selectedIdx = selections[selectedDayId];
+
+  if (selectedIdx === undefined) {
+    empty.style.display = 'flex';
+    content.style.display = 'none';
+    return;
+  }
+
+  empty.style.display = 'none';
+  content.style.display = 'block';
+
+  const plan = day.plans[selectedIdx];
+  if (!plan) return;
+
+  const dayLabel = day.label ? ` - ${day.label}` : '';
+
+  // Timeline
+  const timelineHTML = plan.timeline.map(step => {
+    const colorClass = step.color === 'green' ? 'green' : step.color === 'orange' ? 'orange' : '';
+    return `<div class="timeline-step ${colorClass}">
+      <div class="timeline-time">${step.time}</div>
+      <div class="timeline-desc">${step.desc}</div>
+    </div>`;
+  }).join('');
+
+  // Map
+  const mapHTML = plan.mapQuery ? `<div class="map-container">
+    <iframe src="https://maps.google.com/maps?q=${plan.mapQuery}&z=${plan.mapZoom}&output=embed" width="100%" height="250" style="border:0;border-radius:8px" allowfullscreen loading="lazy"></iframe>
+  </div>` : '';
+
+  // Food
+  const foodHTML = plan.food.length ? `<div class="info-section">
+    <div class="info-section-title">Food Options</div>
+    ${plan.food.map(f => `<div class="info-card">
+      <div class="info-card-title">${f.name}</div>
+      <div class="info-card-desc">${f.desc}</div>
+      <div class="info-card-price">${f.price}</div>
+    </div>`).join('')}
+  </div>` : '';
+
+  // Practical
+  const practicalHTML = plan.practical.length ? `<div class="info-section">
+    <div class="info-section-title">Practical Info</div>
+    <ul class="practical-list">
+      ${plan.practical.map(p => `<li>${p}</li>`).join('')}
+    </ul>
+  </div>` : '';
+
+  // Warning
+  const warningHTML = plan.warning ? `<div class="info-card" style="background:#fef2f2;margin-bottom:20px;">
+    <div class="info-card-title" style="color:var(--red);">Warning</div>
+    <div class="info-card-desc" style="color:#991b1b;">${plan.warning}</div>
+  </div>` : '';
+
+  // Tags
+  const tagsHTML = plan.tags.length ? `<div class="detail-tags">
+    ${plan.tags.map(t => `<span class="tag">${t}</span>`).join('')}
+    ${plan.recommended ? '<span class="tag rec">Recommended</span>' : ''}
+  </div>` : '';
+
+  // Turnov transport info (shown on all Turnov/Travel-to-Turnov days)
+  const turnovTransportHTML = (day.location === 'Turnov' || (day.id === 'apr10') || (day.id === 'apr15')) ? `<div class="info-section">
+    <div class="info-section-title">Turnov Transport Info</div>
+    <div class="info-card" style="background:#f0fdf4;">
+      <div class="info-card-title" style="color:var(--green);">Getting Around</div>
+      <ul class="practical-list">
+        <li><strong>Taxi:</strong> Call the day before based on weather. Pickup/dropoff model -- they drop you at the start and pick you up at a designated spot later.</li>
+        <li><strong>Train to Mala Skala:</strong> 9 min from Turnov, roughly hourly, ~50 CZK</li>
+        <li><strong>mapy.cz app:</strong> Download for excellent trail maps (works offline)</li>
+        <li><strong>cd.cz / idos.cz app:</strong> Download for Czech train schedules</li>
+      </ul>
+    </div>
+  </div>` : '';
+
+  content.innerHTML = `
+    <div class="detail-title">${plan.name}</div>
+    <div class="detail-day-label">${day.dow}, ${day.date}${dayLabel} &middot; ${day.location}</div>
+    ${warningHTML}
+    <div class="info-section">
+      <div class="info-section-title">Timeline</div>
+      <div class="timeline">${timelineHTML}</div>
+    </div>
+    ${mapHTML}
+    ${foodHTML}
+    ${practicalHTML}
+    ${turnovTransportHTML}
+    ${tagsHTML}
+  `;
+}
+
+function selectDay(dayId) {
+  selectedDayId = dayId;
+  renderDayStrip();
+  renderPlans();
+  renderDetail();
+}
+
+function selectPlan(idx) {
+  const current = selections[selectedDayId];
+  if (current === idx) {
+    delete selections[selectedDayId];
+  } else {
+    selections[selectedDayId] = idx;
+  }
+  saveSelections();
+  renderDayStrip();
+  renderPlans();
+  renderDetail();
+}
+
+function clearSelection() {
+  delete selections[selectedDayId];
+  saveSelections();
+  renderDayStrip();
+  renderPlans();
+  renderDetail();
+}
+
+function toggleDetail() {
+  const col = document.getElementById('detailCol');
+  col.classList.toggle('collapsed');
+  const arrow = col.querySelector('.toggle-arrow');
+  if (col.classList.contains('collapsed')) {
+    arrow.style.transform = 'rotate(0deg)';
+  } else {
+    arrow.style.transform = 'rotate(180deg)';
+  }
+}
+
+// Init
+loadSelections();
+renderDayStrip();
+renderPlans();
+renderDetail();
+</script>
+</body>
+</html>
