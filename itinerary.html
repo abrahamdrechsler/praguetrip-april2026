@@ -40,35 +40,58 @@
     backdrop-filter: blur(12px);
     border-bottom: 1px solid var(--card-border);
     padding: 12px 16px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
   }
 
-  .header-left h1 {
+  .header h1 {
     font-size: 18px;
     font-weight: 700;
     letter-spacing: -0.3px;
   }
 
-  .header-left .subtitle {
+  .header .subtitle {
     font-size: 13px;
     color: var(--text-dim);
     margin-top: 2px;
   }
 
-  .header-link {
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--blue);
-    text-decoration: none;
-    padding: 6px 12px;
-    border-radius: 6px;
-    transition: background 0.2s;
+  .tabs {
+    display: flex;
+    gap: 0;
+    padding: 0 16px;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(12px);
+    position: sticky;
+    top: 62px;
+    z-index: 99;
+    border-bottom: 1px solid var(--card-border);
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
   }
 
-  .header-link:hover {
-    background: var(--tag-bg);
+  .tabs::-webkit-scrollbar { display: none; }
+
+  .tab {
+    padding: 10px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-dim);
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s;
+    user-select: none;
+    text-decoration: none;
+    display: inline-block;
+  }
+
+  .tab.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+  }
+
+  .tab:hover:not(.active) {
+    color: var(--text);
   }
 
   /* Day tiles strip */
@@ -79,7 +102,7 @@
     background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(12px);
     position: sticky;
-    top: 62px;
+    top: 108px;
     z-index: 99;
     border-bottom: 1px solid var(--card-border);
     overflow-x: auto;
@@ -518,11 +541,16 @@
 <body>
 
 <div class="header">
-  <div class="header-left">
-    <h1>Prague & Turnov Trip</h1>
-    <div class="subtitle">Itinerary Planner</div>
-  </div>
-  <a href="attractions.html" class="header-link">&larr; Attractions</a>
+  <h1>Prague & Turnov Trip</h1>
+  <div class="subtitle">Apr 3–16, 2026 · Drechsler Family</div>
+</div>
+
+<div class="tabs">
+  <a class="tab" href="attractions.html" style="text-decoration:none;color:var(--text-dim)">Attractions</a>
+  <a class="tab" href="attractions.html" style="text-decoration:none;color:var(--text-dim)">Prague</a>
+  <a class="tab" href="attractions.html" style="text-decoration:none;color:var(--text-dim)">Turnov</a>
+  <a class="tab" href="https://maps.app.goo.gl/vQiEmhTxgBNSkJqX8" target="_blank" rel="noopener" style="text-decoration:none;color:var(--text-dim)">Map ↗</a>
+  <div class="tab active">Itinerary Planner</div>
 </div>
 
 <div class="day-strip" id="dayStrip"></div>
@@ -552,132 +580,45 @@ const DAYS = [
     id: 'apr2',
     date: 'Apr 2',
     dow: 'Thu',
-    label: 'Arrival Day',
-    location: 'Prague',
-    plans: [
-      {
-        name: 'Jet Lag Recovery',
-        emoji: '',
-        summary: 'Check into Kaiserstein Palace, gentle walk to Kampa Island, Lennon Wall, early dinner and bed.',
-        recommended: false,
-        warning: '',
-        tags: ['Kid-Friendly', 'Easy Day'],
-        timeline: [
-          { time: '3:00 PM', desc: 'Check into Kaiserstein Palace apartment. Settle in, unpack essentials.', color: 'blue' },
-          { time: '4:00 PM', desc: 'Gentle walk to Kampa Island (5 min). Let the kids run around on the grass.', color: 'green' },
-          { time: '5:00 PM', desc: 'Walk to Lennon Wall (2 min from Kampa). Quick photo stop.', color: 'blue' },
-          { time: '6:00 PM', desc: 'Dinner at a nearby restaurant in Mala Strana. Keep it simple.', color: 'orange' },
-          { time: '7:30 PM', desc: 'Back to apartment. Early bed for everyone -- fight the jet lag.', color: 'blue' }
-        ],
-        mapQuery: '50.0865,14.4038',
-        mapZoom: 15,
-        food: [
-          { name: 'Mala Strana restaurants', desc: 'Plenty of options within a 5 minute walk of the apartment', price: '200-400 CZK / main' }
-        ],
-        practical: [
-          'Apartment check-in at 3 PM',
-          'Kampa Island is a 5 min walk -- great open space for kids',
-          'Lennon Wall is 2 min from Kampa',
-          'Keep the evening simple -- everyone will be tired from travel'
-        ]
-      }
-    ]
+    label: 'In Transit',
+    location: 'Travel',
+    fixed: true,
+    fixedIcon: '✈️',
+    fixedMessage: 'Overnight flight to Prague. No activities — pack up, board your flight, and sleep.',
+    plans: []
   },
   {
     id: 'apr3',
     date: 'Apr 3',
     dow: 'Fri',
-    label: 'First Full Day',
+    label: 'Arrival Day',
     location: 'Prague',
+    fixed: true,
+    fixedIcon: '🛬',
+    fixedMessage: 'Landing in Prague ~10am. Check into Kaiserstein Palace (3pm check-in — drop bags early if possible). Rest, explore the immediate neighborhood, grab groceries. Dinner at Lokal 5:30 PM.',
     plans: [
       {
-        name: 'Castle & Petrin',
+        name: 'Arrive & Lokal Dinner',
         emoji: '',
-        summary: 'Prague Castle in the morning, Petrin Hill in the afternoon. Full day of top sights.',
-        recommended: false,
+        summary: 'Land ~10 AM, check into Kaiserstein Palace, rest and explore Mala Strana, then dinner at Lokal (Lesser Town) at 5:30 PM.',
+        recommended: true,
         warning: '',
-        tags: ['Must-See', 'Full Day', 'Kid-Friendly'],
+        tags: ['Arrival', 'Dinner Reservation'],
         timeline: [
-          { time: '9:00 AM', desc: 'Walk up Nerudova street to Prague Castle (15 min uphill walk).', color: 'blue' },
-          { time: '9:30 AM', desc: 'Explore Prague Castle complex: St. Vitus Cathedral, Golden Lane. Allow 2 hours.', color: 'blue' },
-          { time: '11:30 AM', desc: 'Lunch near the castle area. Several restaurants on Loretanska.', color: 'orange' },
-          { time: '1:00 PM', desc: 'Walk to Petrin Hill (15 min). Take the funicular up.', color: 'green' },
-          { time: '1:30 PM', desc: 'Petrin Tower climb (299 steps) -- great views. Then Mirror Maze (kids love it).', color: 'green' },
-          { time: '3:30 PM', desc: 'Walk down through the gardens back toward the apartment.', color: 'green' },
-          { time: '5:00 PM', desc: 'Rest at apartment. Dinner out later or pick up food.', color: 'blue' }
-        ],
-        mapQuery: '50.0865,14.4038',
-        mapZoom: 14,
-        food: [
-          { name: 'Castle area restaurants', desc: 'Several options on Loretanska street near the castle', price: '200-400 CZK / main' },
-          { name: 'Petrin area', desc: 'Cafe at the top of Petrin Hill', price: '100-200 CZK' }
-        ],
-        practical: [
-          'Prague Castle opens at 9 AM -- get there early to beat crowds',
-          'Golden Lane is included in castle ticket (250 CZK adult)',
-          'Petrin funicular accepts transit passes',
-          'Petrin Tower: 150 CZK adult, 80 CZK child',
-          'Mirror Maze: 150 CZK adult, 80 CZK child',
-          'Lots of uphill walking -- bring comfortable shoes and a stroller for Thomas'
-        ]
-      },
-      {
-        name: 'Old Town Explorer',
-        emoji: '',
-        summary: 'Cross Charles Bridge to Old Town. Astronomical Clock, Old Town Square, playground.',
-        recommended: false,
-        warning: '',
-        tags: ['Must-See', 'Kid-Friendly'],
-        timeline: [
-          { time: '9:30 AM', desc: 'Walk across Charles Bridge to Old Town (15 min). Enjoy the statues and views.', color: 'blue' },
-          { time: '10:00 AM', desc: 'Astronomical Clock at Old Town Square. Watch the hourly show (on the hour).', color: 'blue' },
-          { time: '10:30 AM', desc: 'Explore Old Town Square. Tyn Church exterior. Wander the side streets.', color: 'blue' },
-          { time: '12:00 PM', desc: 'Lunch in Old Town. Plenty of options.', color: 'orange' },
-          { time: '1:30 PM', desc: 'Walk to Strelecky ostrov playground (island in the river, 10 min walk).', color: 'green' },
-          { time: '3:30 PM', desc: 'Kids play at the playground. Adults relax with a view of the river.', color: 'green' },
-          { time: '5:00 PM', desc: 'Stroll back via Charles Bridge. Golden hour light for photos.', color: 'blue' }
-        ],
-        mapQuery: '50.0875,14.4213',
-        mapZoom: 15,
-        food: [
-          { name: 'Old Town restaurants', desc: 'Wide variety around Old Town Square -- avoid the tourist traps right on the square', price: '200-500 CZK / main' },
-          { name: 'Side streets', desc: 'Better value on streets like Dlouha or Husova', price: '150-300 CZK / main' }
-        ],
-        practical: [
-          'Charles Bridge is less crowded in the morning',
-          'Tip: Climb the Old Town Hall Tower for amazing views (~150-200 CZK, 138 steps, open 10-19 in April)',
-          'Astronomical Clock show happens on the hour',
-          'Strelecky ostrov has a great playground right on the river',
-          'Old Town Square can be very crowded -- keep kids close',
-          'Watch out for overpriced restaurants directly on the square'
-        ]
-      },
-      {
-        name: 'Easy Start',
-        emoji: '',
-        summary: 'Low-key day to ease in. Kampa Island, Charles Bridge, Mala Strana, Petrin Hill.',
-        recommended: false,
-        warning: '',
-        tags: ['Easy Day', 'Kid-Friendly'],
-        timeline: [
-          { time: '10:00 AM', desc: 'Walk to Kampa Island + Lennon Wall. Let kids run around.', color: 'green' },
-          { time: '11:00 AM', desc: 'Cross Charles Bridge (less crowded on weekday mornings).', color: 'blue' },
-          { time: '11:30 AM', desc: 'Quick look at Old Town side, then head back.', color: 'blue' },
-          { time: '12:30 PM', desc: 'Lunch in Mala Strana. Lots of charming restaurants.', color: 'orange' },
-          { time: '2:00 PM', desc: 'Petrin Hill -- take the funicular up, walk around the gardens.', color: 'green' },
-          { time: '4:00 PM', desc: 'Back to apartment. Rest time. Low-key evening.', color: 'blue' }
+          { time: '10:00 AM', desc: 'Land in Prague. Head to Kaiserstein Palace to drop bags.', color: 'blue' },
+          { time: '3:00 PM', desc: 'Check into Kaiserstein Palace. Rest, settle in.', color: 'blue' },
+          { time: '4:30 PM', desc: 'Quick walk around Mala Strana neighborhood.', color: 'green' },
+          { time: '5:30 PM', desc: '🍽️ Dinner at Lokal (Lesser Town). Reservation at 5:30 PM.', color: 'orange' }
         ],
         mapQuery: '50.0865,14.4038',
         mapZoom: 15,
         food: [
-          { name: 'Mala Strana restaurants', desc: 'Charming neighborhood with great food options', price: '200-350 CZK / main' }
+          { name: '🍽️ Lokal (Lesser Town — confirmed)', desc: 'Dinner reservation 5:30 PM.', price: 'Reservation confirmed' }
         ],
         practical: [
-          'Perfect if you are still adjusting to the time change',
-          'Charles Bridge is best early on weekday mornings',
-          'Consider climbing the Old Town Hall Tower (~150-200 CZK, 138 steps, open 10-19)',
-          'Petrin funicular accepts transit passes',
-          'No rush -- this day is about settling in'
+          '🍽️ Lokal dinner: 5:30 PM reservation',
+          'You\'ll be jet-lagged — keep it easy today',
+          'Check-in at Kaiserstein Palace is 3 PM'
         ]
       }
     ]
@@ -1485,8 +1426,8 @@ const DAYS = [
           { time: '1:00 PM', desc: 'Lunch in Turnov.', color: 'orange' },
           { time: '2:00 PM', desc: 'Afternoon: Museum if not done, or rest.', color: 'blue' }
         ],
-        mapQuery: '50.5650,15.2050',
-        mapZoom: 13,
+        mapQuery: '50.5480,15.1850',
+        mapZoom: 14,
         food: [
           { name: 'Hasicarna Klokoci', desc: 'Restaurant in the village near the trails', price: '120-220 CZK / main' },
           { name: 'Turnov restaurants', desc: 'Lunch back in town', price: '150-280 CZK / main' }
@@ -1610,8 +1551,8 @@ const DAYS = [
           { time: '1:00 PM', desc: 'Lunch in Turnov.', color: 'orange' },
           { time: '2:00 PM', desc: 'Afternoon: Museum if not done, or rest.', color: 'blue' }
         ],
-        mapQuery: '50.5650,15.2050',
-        mapZoom: 13,
+        mapQuery: '50.5480,15.1850',
+        mapZoom: 14,
         food: [
           { name: 'Hasicarna Klokoci', desc: 'Restaurant in the village near the trails', price: '120-220 CZK / main' },
           { name: 'Turnov restaurants', desc: 'Lunch back in town', price: '150-280 CZK / main' }
@@ -1843,8 +1784,18 @@ function renderPlans() {
 
   const list = document.getElementById('plansList');
   const clearBtn = document.getElementById('clearBtn');
-  const selectedIdx = selections[selectedDayId];
 
+  if (day.fixed) {
+    clearBtn.className = 'clear-btn';
+    list.innerHTML = `<div style="padding:32px 16px;text-align:center;">
+      <div style="font-size:40px;margin-bottom:12px;">${day.fixedIcon || '📅'}</div>
+      <div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:10px;">${day.date} — ${day.label}</div>
+      <div style="font-size:13px;color:var(--text-dim);line-height:1.7;">${day.fixedMessage || ''}</div>
+    </div>`;
+    return;
+  }
+
+  const selectedIdx = selections[selectedDayId];
   clearBtn.className = selectedIdx !== undefined ? 'clear-btn visible' : 'clear-btn';
 
   list.innerHTML = day.plans.map((p, i) => {
@@ -1871,6 +1822,17 @@ function renderDetail() {
   const empty = document.getElementById('detailEmpty');
   const content = document.getElementById('detailContent');
   const selectedIdx = selections[selectedDayId];
+
+  if (day.fixed) {
+    empty.style.display = 'none';
+    content.style.display = 'block';
+    content.innerHTML = `<div style="padding:60px 24px;text-align:center;">
+      <div style="font-size:56px;margin-bottom:16px;">${day.fixedIcon || '📅'}</div>
+      <div style="font-size:20px;font-weight:700;color:var(--text);margin-bottom:12px;">${day.date} — ${day.label}</div>
+      <div style="font-size:14px;color:var(--text-dim);line-height:1.8;max-width:360px;margin:0 auto;">${day.fixedMessage || ''}</div>
+    </div>`;
+    return;
+  }
 
   if (selectedIdx === undefined) {
     empty.style.display = 'flex';
