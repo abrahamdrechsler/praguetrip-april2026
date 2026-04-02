@@ -624,6 +624,92 @@
     .cal-accommodation { display: none; }
     .calendar th { font-size: 10px; padding: 6px 2px; }
   }
+
+  /* ===== Common Phrases ===== */
+  .phrases-intro {
+    padding: 14px 16px;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    margin-bottom: 20px;
+    color: var(--text-dim);
+    font-size: 0.88rem;
+    line-height: 1.5;
+  }
+  .phrases-section {
+    margin-bottom: 24px;
+  }
+  .phrases-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  @media (max-width: 600px) {
+    .phrases-grid { grid-template-columns: 1fr; }
+  }
+  .phrase-card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    padding: 12px 14px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: box-shadow 0.15s;
+  }
+  .phrase-card:hover {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  }
+  .phrase-text {
+    flex: 1;
+    min-width: 0;
+  }
+  .phrase-en {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    margin-bottom: 3px;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+  .phrase-cz {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 3px;
+    line-height: 1.2;
+  }
+  .phrase-phon {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    font-style: italic;
+  }
+  .phrase-speak-btn {
+    background: var(--tag-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 8px;
+    padding: 8px 10px;
+    cursor: pointer;
+    font-size: 1.05rem;
+    color: var(--text);
+    transition: background 0.15s, transform 0.1s;
+    flex-shrink: 0;
+    line-height: 1;
+  }
+  .phrase-speak-btn:hover { background: #e5e7eb; }
+  .phrase-speak-btn:active { transform: scale(0.93); }
+  .phrase-speak-btn.speaking {
+    background: #dbeafe;
+    border-color: #93c5fd;
+  }
+  .phrases-tts-note {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    text-align: center;
+    margin-top: 16px;
+    padding: 10px;
+    background: var(--tag-bg);
+    border-radius: 8px;
+  }
 </style>
 </head>
 <body>
@@ -1819,6 +1905,73 @@
 
 </div>
 
+<!-- ==================== PHRASES TAB ==================== -->
+<div id="tab-phrases" class="hidden">
+
+  <div class="phrases-intro">
+    Tap <strong>🔊</strong> to hear Czech pronunciation. Czech can be tricky — the audio uses a native-sounding voice so you can hear it properly before trying it yourself.
+  </div>
+
+  <div class="phrases-section">
+    <div class="section-label">Greetings</div>
+    <div class="phrases-grid">
+      <div class="phrase-card"><div class="phrase-text"><div class="phrase-en">Hello (formal)</div><div class="phrase-cz">Dobrý den</div><div class="phrase-phon">DOH-bree den</div></div><button class="phrase-speak-btn" data-cz="Dobrý den" title="Play pronunciation">🔊</button></div>
+      <div class="phrase-card"><div class="phrase-text"><div class="phrase-en">Hello (casual)</div><div class="phrase-cz">Ahoj</div><div class="phrase-phon">AH-hoy</div></div><button class="phrase-speak-btn" data-cz="Ahoj" title="Play pronunciation">🔊</button></div>
+      <div class="phrase-card"><div class="phrase-text"><div class="phrase-en">Good morning</div><div class="phrase-cz">Dobré ráno</div><div class="phrase-phon">DOH-breh RAH-noh</div></div><button class="phrase-speak-btn" data-cz="Dobré ráno" title="Play pronunciation">🔊</button></div>
+      <div class="phrase-card"><div class="phrase-text"><div class="phrase-en">Good evening</div><div class="phrase-cz">Dobrý večer</div><div class="phrase-phon">DOH-bree VEH-cher</div></div><button class="phrase-speak-btn" data-cz="Dobrý večer" title="Play pronunciation">🔊</button></div>
+      <div class="phrase-card"><div class="phrase-text"><div class="phrase-en">Goodbye (formal)</div><div class="phrase-cz">Na shledanou</div><div class="phrase-phon">Nah SKLE-dah-noh</div></div><button class="phrase-speak-btn" data-cz="Na shledanou" title="Play pronunciation">🔊</button></div>
+      <div class="phrase-card"><div class="phrase-text"><div class="phrase-en">Goodbye (casual)</div><div class="phrase-cz">Čau</div><div class="phrase-phon">chow</div></div><button class="phrase-speak-btn" data-cz="Čau" title="Play pronunciation">🔊</button></div>
+    </div>
+  </div>
+
+  <div class="phrases-section">
+    <div class="section-label">Essentials</div>
+    <div class="phrases-grid">
+      <div class="phrase-card"><div class="phrase-text"><div class="phrase-en">Please / You're welcome</div><div class="phrase-cz">Prosím</div><div class="phrase-phon">PROH-seem</div></div><button class="phrase-speak-btn" data-cz="Prosím" title="Play pronunciation">🔊</button></div>
+      <div class="phrase-card"><div class="phrase-text"><div class="phrase-en">Thank you</div><div class="phrase-cz">Děkuji</div><div class="phrase-phon">DYEH-koo-yee</div></div><button class="phrase-speak-btn" data-cz="Děkuji" title="Play pronunciation">🔊</button></div>
+      <div class="phrase-card"><div class="phrase-text"><div class="phrase-en">Yes</div><div class="phrase-cz">Ano</div><div class="phrase-phon">AH-noh</div></div><button class="phrase-speak-btn" data-cz="Ano" title="Play pronunciation">🔊</button></div>
+      <div class="phrase-card"><div class="phrase-text"><div class="phrase-en">No</div><div class="phrase-cz">Ne</div><div class="phrase-phon">Neh</div></div><button class="phrase-speak-btn" data-cz="Ne" title="Play pronunciation">🔊</button></div>
+      <div class="phrase-card"><div class="phrase-text"><div class="phrase-en">Excuse me / Sorry</div><div class="phrase-cz">Promiňte</div><div class="phrase-phon">PROH-min-teh</div></div><button class="phrase-speak-btn" data-cz="Promiňte" title="Play pronunciation">🔊</button></div>
+      <div class="phrase-card"><div class="phrase-text"><div class="phrase-en">I'm sorry</div><div class="phrase-cz">Omlouvám se</div><div class="phrase-phon">ohm-LOO-vahm seh</div></div><button class="phrase-speak-btn" data-cz="Omlouvám se" title="Play pronunciation">🔊</button></div>
+      <div class="phrase-card"><div class="phrase-text"><div class="phrase-en">I don't understand</div><div class="phrase-cz">Nerozumím</div><div class="phrase-phon">NEH-roh-zoo-meem</div></div><button class="phrase-speak-btn" data-cz="Nerozumím" title="Play pronunciation">🔊</button></div>
+      <div class="phrase-card"><div class="phrase-text"><div class="phrase-en">Do you speak English?</div><div class="phrase-cz">Mluvíte anglicky?</div><div class="phrase-phon">MLOO-vee-teh ANG-lits-kee</div></div><button class="phrase-speak-btn" data-cz="Mluvíte anglicky?" title="Play pronunciation">🔊</button></div>
+    </div>
+  </div>
+
+  <div class="phrases-section">
+    <div class="section-label">At a Restaurant</div>
+    <div class="phrases-grid">
+      <div class="phrase-card"><div class="phrase-text"><div class="phrase-en">The menu, please</div><div class="phrase-cz">Jídelní lístek, prosím</div><div class="phrase-phon">YEE-del-nee LEES-tek, PROH-seem</div></div><button class="phrase-speak-btn" data-cz="Jídelní lístek, prosím" title="Play pronunciation">🔊</button></div>
+      <div class="phrase-card"><div class="phrase-text"><div class="phrase-en">Water, please</div><div class="phrase-cz">Vodu, prosím</div><div class="phrase-phon">VOH-doo, PROH-seem</div></div><button class="phrase-speak-btn" data-cz="Vodu, prosím" title="Play pronunciation">🔊</button></div>
+      <div class="phrase-card"><div class="phrase-text"><div class="phrase-en">The bill, please</div><div class="phrase-cz">Účet, prosím</div><div class="phrase-phon">OO-chet, PROH-seem</div></div><button class="phrase-speak-btn" data-cz="Účet, prosím" title="Play pronunciation">🔊</button></div>
+      <div class="phrase-card"><div class="phrase-text"><div class="phrase-en">How much is it?</div><div class="phrase-cz">Kolik to stojí?</div><div class="phrase-phon">KOH-lik toh STOH-yee</div></div><button class="phrase-speak-btn" data-cz="Kolik to stojí?" title="Play pronunciation">🔊</button></div>
+      <div class="phrase-card"><div class="phrase-text"><div class="phrase-en">Cheers!</div><div class="phrase-cz">Na zdraví!</div><div class="phrase-phon">Nah ZDRAH-vee</div></div><button class="phrase-speak-btn" data-cz="Na zdraví!" title="Play pronunciation">🔊</button></div>
+      <div class="phrase-card"><div class="phrase-text"><div class="phrase-en">Delicious!</div><div class="phrase-cz">Výborné!</div><div class="phrase-phon">VEE-bor-neh</div></div><button class="phrase-speak-btn" data-cz="Výborné!" title="Play pronunciation">🔊</button></div>
+      <div class="phrase-card"><div class="phrase-text"><div class="phrase-en">I'm a vegetarian</div><div class="phrase-cz">Jsem vegetarián</div><div class="phrase-phon">Ysem veh-ge-TAR-ee-ahn</div></div><button class="phrase-speak-btn" data-cz="Jsem vegetarián" title="Play pronunciation">🔊</button></div>
+      <div class="phrase-card"><div class="phrase-text"><div class="phrase-en">Without meat</div><div class="phrase-cz">Bez masa</div><div class="phrase-phon">Bez MAH-sah</div></div><button class="phrase-speak-btn" data-cz="Bez masa" title="Play pronunciation">🔊</button></div>
+    </div>
+  </div>
+
+  <div class="phrases-section">
+    <div class="section-label">Getting Around</div>
+    <div class="phrases-grid">
+      <div class="phrase-card"><div class="phrase-text"><div class="phrase-en">Where is...?</div><div class="phrase-cz">Kde je...?</div><div class="phrase-phon">Kdeh yeh</div></div><button class="phrase-speak-btn" data-cz="Kde je?" title="Play pronunciation">🔊</button></div>
+      <div class="phrase-card"><div class="phrase-text"><div class="phrase-en">Left</div><div class="phrase-cz">Vlevo</div><div class="phrase-phon">VLEH-voh</div></div><button class="phrase-speak-btn" data-cz="Vlevo" title="Play pronunciation">🔊</button></div>
+      <div class="phrase-card"><div class="phrase-text"><div class="phrase-en">Right</div><div class="phrase-cz">Vpravo</div><div class="phrase-phon">VPRAH-voh</div></div><button class="phrase-speak-btn" data-cz="Vpravo" title="Play pronunciation">🔊</button></div>
+      <div class="phrase-card"><div class="phrase-text"><div class="phrase-en">Straight ahead</div><div class="phrase-cz">Rovně</div><div class="phrase-phon">ROHV-nyeh</div></div><button class="phrase-speak-btn" data-cz="Rovně" title="Play pronunciation">🔊</button></div>
+      <div class="phrase-card"><div class="phrase-text"><div class="phrase-en">Train station</div><div class="phrase-cz">Nádraží</div><div class="phrase-phon">NAH-drah-zhee</div></div><button class="phrase-speak-btn" data-cz="Nádraží" title="Play pronunciation">🔊</button></div>
+      <div class="phrase-card"><div class="phrase-text"><div class="phrase-en">Pharmacy</div><div class="phrase-cz">Lékárna</div><div class="phrase-phon">LEH-kahr-nah</div></div><button class="phrase-speak-btn" data-cz="Lékárna" title="Play pronunciation">🔊</button></div>
+      <div class="phrase-card"><div class="phrase-text"><div class="phrase-en">Hospital</div><div class="phrase-cz">Nemocnice</div><div class="phrase-phon">NEH-mohts-nee-tseh</div></div><button class="phrase-speak-btn" data-cz="Nemocnice" title="Play pronunciation">🔊</button></div>
+      <div class="phrase-card"><div class="phrase-text"><div class="phrase-en">Help!</div><div class="phrase-cz">Pomoc!</div><div class="phrase-phon">POH-mohts</div></div><button class="phrase-speak-btn" data-cz="Pomoc!" title="Play pronunciation">🔊</button></div>
+    </div>
+  </div>
+
+  <div class="phrases-tts-note">
+    Audio uses your device's built-in Czech voice (Web Speech API). Quality varies by device — Apple devices tend to sound best.
+  </div>
+
+</div>
+
 
 <!-- ==================== PHRASES TAB ==================== -->
 <div id="tab-phrases" class="hidden">
@@ -2017,6 +2170,25 @@
         carousel.innerHTML = '<div class="card-image-placeholder">📷</div>';
       }
     }, 100);
+  });
+
+  // Phrases TTS
+  document.querySelectorAll('.phrase-speak-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const text = btn.dataset.cz;
+      if (!('speechSynthesis' in window)) {
+        alert('Text-to-speech is not supported in this browser.');
+        return;
+      }
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'cs-CZ';
+      utterance.rate = 0.85;
+      btn.classList.add('speaking');
+      utterance.onend = () => btn.classList.remove('speaking');
+      utterance.onerror = () => btn.classList.remove('speaking');
+      window.speechSynthesis.speak(utterance);
+    });
   });
 </script>
 
