@@ -593,6 +593,9 @@ const DAYS = [
     dow: 'Fri',
     label: '🛬 Arrival Day',
     location: 'Prague',
+    reservations: [
+      { name: 'Lokal (Lesser Town)', time: '5:30 PM', desc: 'Dinner reservation — confirmed.' }
+    ],
     plans: [
       {
         name: 'Arrive & Lokal Dinner',
@@ -907,6 +910,9 @@ const DAYS = [
     dow: 'Tue',
     label: '📸 Photo Session | 🍽️ Taro Dinner',
     location: 'Prague',
+    reservations: [
+      { name: 'Taro (Vietnamese)', time: '5:30 PM', desc: 'Dinner — Abe & Allie. Ref: 9YN-GRQ. Indoor, 2 adults.' }
+    ],
     plans: [
       {
         name: 'Old Town Deep Dive',
@@ -1832,8 +1838,22 @@ function renderDetail() {
   }
 
   if (selectedIdx === undefined) {
-    empty.style.display = 'flex';
-    content.style.display = 'none';
+    if (day.reservations && day.reservations.length) {
+      empty.style.display = 'none';
+      content.style.display = 'block';
+      content.innerHTML = `<div class="info-section">
+        <div class="info-section-title">Confirmed Reservations</div>
+        ${day.reservations.map(r => `<div class="info-card" style="background:#fff7ed;border-left:3px solid var(--orange);">
+          <div class="info-card-title" style="color:var(--orange);">🍽️ ${r.name}</div>
+          <div class="info-card-desc">${r.time} — ${r.desc}</div>
+          <div class="info-card-price">Reservation confirmed</div>
+        </div>`).join('')}
+      </div>
+      <div style="padding:16px;text-align:center;color:var(--text-dim);font-size:13px;">← Pick a plan to see the full day details</div>`;
+    } else {
+      empty.style.display = 'flex';
+      content.style.display = 'none';
+    }
     return;
   }
 
@@ -1903,9 +1923,20 @@ function renderDetail() {
     </div>
   </div>` : '';
 
+  // Reservations
+  const reservationsHTML = (day.reservations && day.reservations.length) ? `<div class="info-section">
+    <div class="info-section-title">Confirmed Reservations</div>
+    ${day.reservations.map(r => `<div class="info-card" style="background:#fff7ed;border-left:3px solid var(--orange);">
+      <div class="info-card-title" style="color:var(--orange);">🍽️ ${r.name}</div>
+      <div class="info-card-desc">${r.time} — ${r.desc}</div>
+      <div class="info-card-price">Reservation confirmed</div>
+    </div>`).join('')}
+  </div>` : '';
+
   content.innerHTML = `
     <div class="detail-title">${plan.name}</div>
     <div class="detail-day-label">${day.dow}, ${day.date}${dayLabel} &middot; ${day.location}</div>
+    ${reservationsHTML}
     ${warningHTML}
     <div class="info-section">
       <div class="info-section-title">Timeline</div>
