@@ -288,6 +288,86 @@
     background: #f9fafb;
   }
 
+  /* Phrases tab */
+  .phrase-group {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    margin-bottom: 16px;
+    overflow: hidden;
+  }
+
+  .phrase-group-title {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--text-muted);
+    padding: 10px 14px 8px;
+    border-bottom: 1px solid var(--card-border);
+    background: #fafafa;
+  }
+
+  .phrase-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--card-border);
+  }
+
+  .phrase-row:last-child {
+    border-bottom: none;
+  }
+
+  .phrase-en {
+    width: 150px;
+    flex-shrink: 0;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .phrase-cz {
+    flex: 1;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--blue);
+  }
+
+  .phrase-pron {
+    font-size: 11px;
+    font-weight: 400;
+    color: var(--text-muted);
+    font-style: italic;
+  }
+
+  .phrase-btn {
+    flex-shrink: 0;
+    background: none;
+    border: 1px solid var(--card-border);
+    border-radius: 6px;
+    padding: 4px 8px;
+    font-size: 15px;
+    cursor: pointer;
+    transition: background 0.15s;
+    line-height: 1;
+  }
+
+  .phrase-btn:hover {
+    background: #f3f4f6;
+  }
+
+  .phrase-btn.speaking {
+    background: #eff6ff;
+    border-color: #93c5fd;
+  }
+
+  @media (max-width: 480px) {
+    .phrase-en { width: 110px; font-size: 12px; }
+    .phrase-cz { font-size: 13px; }
+  }
+
   .verdict {
     margin-top: 12px;
     padding: 10px 12px;
@@ -557,6 +637,7 @@
   <div class="tab active" data-tab="itinerary">Itinerary</div>
   <div class="tab" data-tab="prague">Prague <span class="count">8</span></div>
   <div class="tab" data-tab="turnov">Turnov <span class="count">8</span></div>
+  <div class="tab" data-tab="phrases">Phrases</div>
   <a class="tab" href="https://maps.app.goo.gl/vQiEmhTxgBNSkJqX8" target="_blank" rel="noopener" style="text-decoration:none;color:var(--text-dim)">Map ↗</a>
   <a class="tab" href="itinerary.html" style="text-decoration:none;color:var(--text-dim)">Itinerary Planner ↗</a>
 </div>
@@ -1739,9 +1820,81 @@
 </div>
 
 
+<!-- ==================== PHRASES TAB ==================== -->
+<div id="tab-phrases" class="hidden">
+
+  <div class="section-label">Essential Czech Phrases</div>
+  <p style="font-size:13px;color:var(--text-dim);margin-bottom:16px;line-height:1.6;">Tap the speaker button to hear the pronunciation. Czech locals genuinely appreciate any attempt to speak the language.</p>
+
+  <div class="phrase-group">
+    <div class="phrase-group-title">Basics</div>
+    <div class="phrase-row"><div class="phrase-en">Hello</div><div class="phrase-cz">Ahoj <span class="phrase-pron">(ah-hoy)</span></div><button class="phrase-btn" onclick="speak('Ahoj')">🔊</button></div>
+    <div class="phrase-row"><div class="phrase-en">Good morning</div><div class="phrase-cz">Dobré ráno <span class="phrase-pron">(dob-reh rah-no)</span></div><button class="phrase-btn" onclick="speak('Dobré ráno')">🔊</button></div>
+    <div class="phrase-row"><div class="phrase-en">Good evening</div><div class="phrase-cz">Dobrý večer <span class="phrase-pron">(dob-ree veh-cher)</span></div><button class="phrase-btn" onclick="speak('Dobrý večer')">🔊</button></div>
+    <div class="phrase-row"><div class="phrase-en">Goodbye</div><div class="phrase-cz">Na shledanou <span class="phrase-pron">(nah shkle-dah-no)</span></div><button class="phrase-btn" onclick="speak('Na shledanou')">🔊</button></div>
+    <div class="phrase-row"><div class="phrase-en">Please / You're welcome</div><div class="phrase-cz">Prosím <span class="phrase-pron">(proh-seem)</span></div><button class="phrase-btn" onclick="speak('Prosím')">🔊</button></div>
+    <div class="phrase-row"><div class="phrase-en">Thank you</div><div class="phrase-cz">Děkuji <span class="phrase-pron">(dyeh-koo-yee)</span></div><button class="phrase-btn" onclick="speak('Děkuji')">🔊</button></div>
+    <div class="phrase-row"><div class="phrase-en">Yes / No</div><div class="phrase-cz">Ano / Ne <span class="phrase-pron">(ah-no / neh)</span></div><button class="phrase-btn" onclick="speak('Ano')">🔊</button></div>
+    <div class="phrase-row"><div class="phrase-en">Excuse me / Sorry</div><div class="phrase-cz">Promiňte <span class="phrase-pron">(pro-min-teh)</span></div><button class="phrase-btn" onclick="speak('Promiňte')">🔊</button></div>
+  </div>
+
+  <div class="phrase-group">
+    <div class="phrase-group-title">Getting Around</div>
+    <div class="phrase-row"><div class="phrase-en">Where is…?</div><div class="phrase-cz">Kde je…? <span class="phrase-pron">(gdeh yeh)</span></div><button class="phrase-btn" onclick="speak('Kde je')">🔊</button></div>
+    <div class="phrase-row"><div class="phrase-en">How much does it cost?</div><div class="phrase-cz">Kolik to stojí? <span class="phrase-pron">(koh-lik toh stoy-ee)</span></div><button class="phrase-btn" onclick="speak('Kolik to stojí')">🔊</button></div>
+    <div class="phrase-row"><div class="phrase-en">I don't understand</div><div class="phrase-cz">Nerozumím <span class="phrase-pron">(neh-roh-zoo-meem)</span></div><button class="phrase-btn" onclick="speak('Nerozumím')">🔊</button></div>
+    <div class="phrase-row"><div class="phrase-en">Do you speak English?</div><div class="phrase-cz">Mluvíte anglicky? <span class="phrase-pron">(mloo-vee-teh ang-lits-ky)</span></div><button class="phrase-btn" onclick="speak('Mluvíte anglicky')">🔊</button></div>
+    <div class="phrase-row"><div class="phrase-en">To the right / left</div><div class="phrase-cz">Vpravo / Vlevo <span class="phrase-pron">(vprah-vo / vleh-vo)</span></div><button class="phrase-btn" onclick="speak('Vpravo')">🔊</button></div>
+    <div class="phrase-row"><div class="phrase-en">Straight ahead</div><div class="phrase-cz">Rovně <span class="phrase-pron">(rov-nyeh)</span></div><button class="phrase-btn" onclick="speak('Rovně')">🔊</button></div>
+  </div>
+
+  <div class="phrase-group">
+    <div class="phrase-group-title">Restaurants &amp; Food</div>
+    <div class="phrase-row"><div class="phrase-en">The menu, please</div><div class="phrase-cz">Jídelní lístek, prosím <span class="phrase-pron">(yee-del-nee lees-tek, proh-seem)</span></div><button class="phrase-btn" onclick="speak('Jídelní lístek, prosím')">🔊</button></div>
+    <div class="phrase-row"><div class="phrase-en">I would like…</div><div class="phrase-cz">Chtěl bych… <span class="phrase-pron">(kh-tyel bikh)</span></div><button class="phrase-btn" onclick="speak('Chtěl bych')">🔊</button></div>
+    <div class="phrase-row"><div class="phrase-en">Delicious!</div><div class="phrase-cz">Výborné! <span class="phrase-pron">(vee-bor-neh)</span></div><button class="phrase-btn" onclick="speak('Výborné')">🔊</button></div>
+    <div class="phrase-row"><div class="phrase-en">The bill, please</div><div class="phrase-cz">Účet, prosím <span class="phrase-pron">(oo-chet, proh-seem)</span></div><button class="phrase-btn" onclick="speak('Účet, prosím')">🔊</button></div>
+    <div class="phrase-row"><div class="phrase-en">Beer, please</div><div class="phrase-cz">Pivo, prosím <span class="phrase-pron">(pih-vo, proh-seem)</span></div><button class="phrase-btn" onclick="speak('Pivo, prosím')">🔊</button></div>
+    <div class="phrase-row"><div class="phrase-en">Water, please</div><div class="phrase-cz">Vodu, prosím <span class="phrase-pron">(voh-doo, proh-seem)</span></div><button class="phrase-btn" onclick="speak('Vodu, prosím')">🔊</button></div>
+  </div>
+
+  <div class="phrase-group">
+    <div class="phrase-group-title">With Kids</div>
+    <div class="phrase-row"><div class="phrase-en">Where is the playground?</div><div class="phrase-cz">Kde je hřiště? <span class="phrase-pron">(gdeh yeh hrzhish-teh)</span></div><button class="phrase-btn" onclick="speak('Kde je hřiště')">🔊</button></div>
+    <div class="phrase-row"><div class="phrase-en">Toilet / Bathroom</div><div class="phrase-cz">Toaleta <span class="phrase-pron">(toh-ah-leh-tah)</span></div><button class="phrase-btn" onclick="speak('Toaleta')">🔊</button></div>
+    <div class="phrase-row"><div class="phrase-en">Help!</div><div class="phrase-cz">Pomoc! <span class="phrase-pron">(poh-mots)</span></div><button class="phrase-btn" onclick="speak('Pomoc')">🔊</button></div>
+  </div>
+
+  <div style="font-size:12px;color:var(--text-muted);margin-top:8px;padding:12px;background:var(--card-bg);border-radius:8px;border:1px solid var(--card-border);">
+    💡 Audio uses your device's text-to-speech in Czech. Quality varies by device — it's a guide, not perfect.
+  </div>
+
+</div>
+
+
 </div>
 
 <script>
+  // Czech phrase pronunciation
+  function speak(text) {
+    if (!window.speechSynthesis) return;
+    window.speechSynthesis.cancel();
+    const utter = new SpeechSynthesisUtterance(text);
+    utter.lang = 'cs-CZ';
+    utter.rate = 0.85;
+    // Find a Czech voice if available, otherwise fall back
+    const voices = window.speechSynthesis.getVoices();
+    const czVoice = voices.find(v => v.lang.startsWith('cs'));
+    if (czVoice) utter.voice = czVoice;
+    // Visual feedback
+    const btns = document.querySelectorAll('.phrase-btn');
+    btns.forEach(b => { if (b.getAttribute('onclick') === `speak('${text}')`) b.classList.add('speaking'); });
+    utter.onend = () => btns.forEach(b => b.classList.remove('speaking'));
+    window.speechSynthesis.speak(utter);
+  }
+  // Voices may load async
+  window.speechSynthesis && window.speechSynthesis.addEventListener('voiceschanged', () => {});
+
   // Tab switching
   document.querySelectorAll('.tab').forEach(tab => {
     tab.addEventListener('click', () => {
